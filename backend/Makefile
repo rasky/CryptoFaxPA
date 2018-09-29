@@ -2,9 +2,11 @@
 
 all: backend
 
+.env:
+	heroku config --shell >.env
+
 backend:
 	go build
 
-run: backend
+run: .env backend
 	goreman -f Procfile.dev start
-
