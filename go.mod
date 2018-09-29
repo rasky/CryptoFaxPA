@@ -1,3 +1,5 @@
+// +heroku install ./backend
+
 module github.com/rasky/realcrypto
 
 require (
