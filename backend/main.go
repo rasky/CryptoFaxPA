@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -27,6 +29,9 @@ type envConfig struct {
 	// CloudMQTT URL to connect to
 	MqttUrl string `envconfig:"CLOUDMQTT_URL" required:"true"`
 
+	// Redis URL to connect to
+	RedisUrl string `envconfig:"REDIS_URL" required:"true"`
+
 	// Turn off low-level Slack API debugging
 	Debug bool `envconfig:"DEBUG"`
 }
@@ -43,13 +48,21 @@ func _main(args []string) int {
 		return 1
 	}
 
+	imgcache, err := NewImageCache(env.RedisUrl)
+	if err != nil {
+		log.Printf("[ERROR] Failed to connect to Redis: %s", err)
+		return 1
+	}
+
 	// Listening slack event and response
 	log.Printf("[INFO] Start slack event listening")
 	client := slack.New(env.BotToken)
 	client.SetDebug(env.Debug)
 	slackListener := &SlackListener{
-		client: client,
-		botID:  env.BotID,
+		token:    env.BotToken,
+		client:   client,
+		botID:    env.BotID,
+		imgcache: imgcache,
 	}
 	go slackListener.ListenAndResponse()
 
@@ -57,6 +70,17 @@ func _main(args []string) int {
 	// responses from slack (kicked by user action)
 	http.Handle("/interaction", interactionHandler{
 		verificationToken: env.VerificationToken,
+	})
+
+	http.HandleFunc("/image/", func(rw http.ResponseWriter, req *http.Request) {
+		var img []byte
+		if err := imgcache.Get(req.URL.Path, &img); err != nil {
+			rw.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		rw.Header().Set("Content-type", "image/png")
+		io.Copy(rw, bytes.NewReader(img))
 	})
 
 	log.Printf("[INFO] Server listening on :%s", env.Port)
