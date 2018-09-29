@@ -1,0 +1,2 @@
+web: ./cryptofax-backend
+ngrok: dme --port 5000 --subdomain slackbot
