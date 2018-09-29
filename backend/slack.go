@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/nlopes/slack"
 )
@@ -18,6 +19,9 @@ type SlackListener struct {
 	client    *slack.Client
 	botID     string
 	channelID string
+
+	isIMLock sync.Mutex
+	isIM     map[string]bool
 }
 
 // LstenAndResponse listens slack events and response
@@ -41,17 +45,40 @@ func (s *SlackListener) ListenAndResponse() {
 
 // handleMesageEvent handles message events.
 func (s *SlackListener) handleMessageEvent(ev *slack.MessageEvent) error {
-	// Only response mention to bot. Ignore else.
-	if !strings.HasPrefix(ev.Msg.Text, fmt.Sprintf("<@%s> ", s.botID)) {
+	// Ignore all kind of special messages that are not real messages, at least
+	// for now.
+	if ev.Msg.SubType != "" {
 		return nil
 	}
 
-	// Parse message
-	m := strings.Split(strings.TrimSpace(ev.Msg.Text), " ")[1:]
-	if len(m) == 0 || len(m[0]) == 0 {
-		return fmt.Errorf("invalid message")
+	// Check if the channel is an IM (using a cache to avoid polling Slack API too much)
+	s.isIMLock.Lock()
+	if s.isIM == nil {
+		s.isIM = make(map[string]bool)
+	}
+	if _, found := s.isIM[ev.Msg.Channel]; !found {
+		channel, err := s.client.GetConversationInfo(ev.Msg.Channel, false)
+		if err != nil {
+			s.isIMLock.Unlock()
+			return fmt.Errorf("error retrieving group info: %#v", err)
+		}
+		s.isIM[ev.Msg.Channel] = channel.IsIM
+	}
+	isIm := s.isIM[ev.Msg.Channel]
+	s.isIMLock.Unlock()
+
+	m := strings.TrimSpace(ev.Msg.Text)
+
+	// Only response mention to bot. Ignore else (unless in direct message)
+	mention := fmt.Sprintf("<@%s> ", s.botID)
+	if strings.HasPrefix(m, mention) {
+		// Remove mention from text
+		m = m[len(mention):]
+	} else if !isIm {
+		return nil
 	}
 
+	// Get information on the user
 	u, err := s.client.GetUserInfo(ev.Msg.User)
 	if err != nil {
 		return fmt.Errorf("error retrieving user info: %v", err)
@@ -63,13 +90,13 @@ func (s *SlackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 		AuthorName: u.RealName,
 		Color:      "#f9a41b",
 		CallbackID: "cryptofax",
-		Text:       m[0],
+		Text:       m,
 		Actions: []slack.AttachmentAction{
 			{
 				Name:  actionStart,
 				Text:  "Fax it :fax:",
 				Type:  "button",
-				Value: m[0],
+				Value: m,
 				Style: "primary",
 			},
 			{
