@@ -24,16 +24,20 @@ type envConfig struct {
 	// BotID is bot user ID.
 	BotID string `envconfig:"BOT_ID" required:"true"`
 
+	// CloudMQTT URL to connect to
+	MqttUrl string `envconfig:"CLOUDMQTT_URL" required:"true"`
+
 	// Turn off low-level Slack API debugging
 	Debug bool `envconfig:"DEBUG"`
 }
+
+var env envConfig
 
 func main() {
 	os.Exit(_main(os.Args[1:]))
 }
 
 func _main(args []string) int {
-	var env envConfig
 	if err := envconfig.Process("", &env); err != nil {
 		log.Printf("[ERROR] Failed to process env var: %s", err)
 		return 1

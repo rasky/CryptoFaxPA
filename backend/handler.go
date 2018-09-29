@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/nlopes/slack"
 )
@@ -56,6 +57,23 @@ func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Printf("INTERACTION ACTION: %#v", action)
 	switch action.Name {
 	case actionStart:
+
+		// Try to send a message to CloudMQTT
+		mqtt, err := NewMqttClient("backend", env.MqttUrl)
+		if err != nil {
+			log.Printf("[ERROR] %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		defer mqtt.Disconnect(0)
+
+		token := mqtt.Publish("fax", 1, false, action.Value)
+		if !token.WaitTimeout(5 * time.Second) {
+			log.Printf("[ERROR] timeout while publishing to cloudmqtt")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		title := ":ok: your fax has been encrypted and transmitted!"
 		responseMessage(w, message.OriginalMessage, title, "")
 		return
@@ -64,7 +82,7 @@ func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		responseMessage(w, message.OriginalMessage, title, "")
 		return
 	default:
-		log.Printf("[ERROR] ]Invalid action was submitted: %s", action.Name)
+		log.Printf("[ERROR] Invalid action was submitted: %s", action.Name)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
