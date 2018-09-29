@@ -15,12 +15,6 @@ const (
 	ClientMqttQos = 1 // Use MQTT QOS=1 to be more resilient on disconnections
 )
 
-type Fax struct {
-	Sender  string
-	Message string
-	Picture []byte
-}
-
 func main() {
 	surl := os.Getenv("CLOUDMQTT_URL")
 	if surl == "" {
@@ -34,7 +28,7 @@ func main() {
 	defer c.Disconnect(0)
 
 	c.Subscribe(common.FaxMqttTopic, ClientMqttQos, func(client mqtt.Client, msg mqtt.Message) {
-		var fax Fax
+		var fax common.Fax
 		if err := msgpack.Unmarshal(msg.Payload(), &fax); err != nil {
 			log.Printf("[ERROR] error decoding mqtt payload: %v", err)
 			return
