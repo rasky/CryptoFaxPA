@@ -6,5 +6,7 @@ github.com/kelseyhightower/envconfig v1.3.0 h1:IvRS4f2VcIQy6j4ORGIf9145T/AsUB+oY
 github.com/kelseyhightower/envconfig v1.3.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
 github.com/nlopes/slack v0.3.0 h1:jCxvaS8wC4Bb1jnbqZMjCDkOOgy4spvQWcrw/TF0L0E=
 github.com/nlopes/slack v0.3.0/go.mod h1:jVI4BBK3lSktibKahxBF74txcK2vyvkza1z/+rRnVAM=
+github.com/vmihailenco/msgpack v4.0.0+incompatible h1:R/ftCULcY/r0SLpalySUSd8QV4fVABi/h0D/IjlYJzg=
+github.com/vmihailenco/msgpack v4.0.0+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
 golang.org/x/net v0.0.0-20180926154720-4dfa2610cdf3 h1:dgd4x4kJt7G4k4m93AYLzM8Ni6h2qLTfh9n9vXJT3/0=
 golang.org/x/net v0.0.0-20180926154720-4dfa2610cdf3/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=

@@ -9,7 +9,10 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/rasky/realcrypto/common"
+
 	"github.com/nlopes/slack"
+	"github.com/vmihailenco/msgpack"
 )
 
 // interactionHandler handles interactive message response.
@@ -59,7 +62,7 @@ func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case actionStart:
 
 		// Try to send a message to CloudMQTT
-		mqtt, err := NewMqttClient("backend", env.MqttUrl)
+		mqtt, err := common.NewMqttClient("backend", env.MqttUrl)
 		if err != nil {
 			log.Printf("[ERROR] %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -67,7 +70,15 @@ func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		defer mqtt.Disconnect(0)
 
-		token := mqtt.Publish("fax", 1, false, action.Value)
+		fax := common.Fax{
+			Message: action.Value,
+		}
+		payload, err := msgpack.Marshal(&fax)
+		if err != nil {
+			panic(err) // programming error, structure not marshalable
+		}
+
+		token := mqtt.Publish(common.FaxMqttTopic, 1, false, payload)
 		if !token.WaitTimeout(5 * time.Second) {
 			log.Printf("[ERROR] timeout while publishing to cloudmqtt")
 			w.WriteHeader(http.StatusInternalServerError)
