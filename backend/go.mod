@@ -1,4 +1,4 @@
-module github.com/rasky/realcrypto
+module github.com/rasky/realcrypto/backend
 
 require (
 	github.com/gorilla/websocket v1.4.0 // indirect
