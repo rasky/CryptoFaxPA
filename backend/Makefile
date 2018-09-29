@@ -3,7 +3,7 @@
 all: backend
 
 backend:
-	go build -o cryptofax-backend
+	go build
 
 run: backend
 	goreman -f Procfile.dev start
