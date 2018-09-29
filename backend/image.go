@@ -28,7 +28,7 @@ var stucki = dither.Dither{
 }
 
 // Load an image (PNG or JPG), resize, convert to monochrome and return as PNG
-func ConvertImage(in []byte, width uint) ([]byte, error) {
+func ConvertImageMono(in []byte, width uint) ([]byte, error) {
 	orig, _, err := image.Decode(bytes.NewReader(in))
 	if err != nil {
 		return nil, err

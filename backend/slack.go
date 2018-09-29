@@ -44,10 +44,6 @@ func (s *SlackListener) ListenAndResponse() {
 			if err := s.handleMessageEvent(ev); err != nil {
 				log.Printf("[ERROR] Failed to handle message: %s", err)
 			}
-		case *slack.FileSharedEvent:
-			if err := s.handleImageShare(ev); err != nil {
-				log.Printf("[ERROR] Failed to handle image: %s", err)
-			}
 		}
 	}
 }
@@ -111,26 +107,33 @@ func (s *SlackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 		return fmt.Errorf("error retrieving user info: %v", err)
 	}
 
-	if ev.Msg.File != nil {
-		filetype := ev.Msg.File.Filetype
+	// If there's an image attachment, convert it to monochrome format
+	// and save it into the image cache for further usage
+	if len(ev.Msg.Files) == 1 {
+		filetype := ev.Msg.Files[0].Filetype
 		if filetype == "jpg" || filetype == "png" {
-			img, err := s.downloadPrivateFile(ev.Msg.File.Thumb160)
+			img, err := s.downloadPrivateFile(ev.Msg.Files[0].Thumb160)
 			if err != nil {
 				return fmt.Errorf("error retrieving image: %v", err)
 			}
 
-			img, err = ConvertImage(img, 128)
+			img, err = ConvertImageMono(img, 128)
 			if err != nil {
 				return fmt.Errorf("error converting image: %v", err)
 			}
-			s.imgcache.Set("/image/prova.png", img, 24*time.Hour)
+			s.imgcache.Set("/image/"+ev.Msg.Channel, img, 1*time.Hour)
 		}
+	}
+
+	// If there's not text to send, don't do anything
+	if m == "" {
+		return nil
 	}
 
 	// value is passed to message handler when request is approved.
 	attachment := slack.Attachment{
 		Pretext:    "Confirm sending this text to Cryptofax? :fax:",
-		AuthorName: u.RealName,
+		AuthorName: u.Profile.DisplayName,
 		Color:      "#f9a41b",
 		CallbackID: "cryptofax",
 		Text:       m,
@@ -161,32 +164,5 @@ func (s *SlackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 		return fmt.Errorf("failed to post message: %s", err)
 	}
 
-	return nil
-}
-
-// handleMesageEvent handles message events.
-func (s *SlackListener) handleImageShare(ev *slack.FileSharedEvent) error {
-	log.Printf("*** IMAGE: %#v", ev)
-
-	file, _, _, err := s.client.GetFileInfo(ev.File.ID, 0, 0)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("*** IMAGE2: %#v", file)
-
-	filetype := file.Filetype
-	if filetype == "jpg" || filetype == "png" {
-		img, err := s.downloadPrivateFile(file.Thumb160)
-		if err != nil {
-			return fmt.Errorf("error retrieving image: %v", err)
-		}
-
-		img, err = ConvertImage(img, 128)
-		if err != nil {
-			return fmt.Errorf("error converting image: %v", err)
-		}
-		s.imgcache.Set("/image/prova.png", img, 24*time.Hour) // FIXME
-	}
 	return nil
 }
