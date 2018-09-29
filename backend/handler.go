@@ -71,7 +71,8 @@ func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		defer mqtt.Disconnect(0)
 
 		fax := common.Fax{
-			Message: action.Value,
+			Timestamp: time.Now(),
+			Message:   action.Value,
 		}
 		payload, err := msgpack.Marshal(&fax)
 		if err != nil {
