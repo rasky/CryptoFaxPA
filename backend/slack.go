@@ -114,12 +114,12 @@ func (s *SlackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 	if len(ev.Msg.Files) == 1 {
 		filetype := ev.Msg.Files[0].Filetype
 		if filetype == "jpg" || filetype == "png" {
-			img, err := s.downloadPrivateFile(ev.Msg.Files[0].Thumb160)
+			img, err := s.downloadPrivateFile(ev.Msg.Files[0].URLPrivateDownload)
 			if err != nil {
 				return fmt.Errorf("error retrieving image: %v", err)
 			}
 
-			img, err = ConvertImageMono(img, 128)
+			img, err = ConvertImageMono(img, 360)
 			if err != nil {
 				return fmt.Errorf("error converting image: %v", err)
 			}
