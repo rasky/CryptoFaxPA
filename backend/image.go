@@ -93,3 +93,7 @@ func (ic *ImageCache) Set(key string, object interface{}, expiration time.Durati
 func (ic *ImageCache) Get(key string, object interface{}) error {
 	return ic.cache.Get(key, &object)
 }
+
+func (ic *ImageCache) Del(key string) error {
+	return ic.cache.Delete(key)
+}

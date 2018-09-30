@@ -18,6 +18,7 @@ import (
 // interactionHandler handles interactive message response.
 type interactionHandler struct {
 	slackClient       *slack.Client
+	imgcache          *ImageCache
 	verificationToken string
 }
 
@@ -61,6 +62,21 @@ func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch action.Name {
 	case actionStart:
 
+		fax := common.Fax{
+			Sender:    message.OriginalMessage.Attachments[0].AuthorName,
+			Timestamp: time.Now(),
+			Message:   action.Value,
+		}
+
+		// See if there was a picture
+		imageurl := message.OriginalMessage.Attachments[0].ImageURL
+		if imageurl != "" {
+			if resp, err := http.Get(imageurl); err == nil {
+				fax.Picture, _ = ioutil.ReadAll(resp.Body)
+				resp.Body.Close()
+			}
+		}
+
 		// Try to send a message to CloudMQTT
 		mqtt, err := common.NewMqttClient("backend", env.MqttUrl)
 		if err != nil {
@@ -69,11 +85,6 @@ func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer mqtt.Disconnect(0)
-
-		fax := common.Fax{
-			Timestamp: time.Now(),
-			Message:   action.Value,
-		}
 		payload, err := msgpack.Marshal(&fax)
 		if err != nil {
 			panic(err) // programming error, structure not marshalable
@@ -86,10 +97,12 @@ func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		h.imgcache.Del("/channel/" + message.Channel.ID) // use images once only
 		title := ":ok: your fax has been encrypted and transmitted!"
 		responseMessage(w, message.OriginalMessage, title, "")
 		return
 	case actionCancel:
+		h.imgcache.Del("/channel/" + message.Channel.ID) // use images once only
 		title := fmt.Sprintf(":x: request canceled")
 		responseMessage(w, message.OriginalMessage, title, "")
 		return

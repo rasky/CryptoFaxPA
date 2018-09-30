@@ -14,6 +14,9 @@ import (
 // https://api.slack.com/slack-apps
 // https://api.slack.com/internal-integrations
 type envConfig struct {
+	// URL at which the server is reachable
+	ServerUrl string `envconfig:"SERVER_URL" required:"true"`
+
 	// Port is server port to be listened.
 	Port string `envconfig:"PORT" default:"3000"`
 
@@ -70,6 +73,7 @@ func _main(args []string) int {
 	// responses from slack (kicked by user action)
 	http.Handle("/interaction", interactionHandler{
 		verificationToken: env.VerificationToken,
+		imgcache:          imgcache,
 	})
 
 	http.HandleFunc("/image/", func(rw http.ResponseWriter, req *http.Request) {

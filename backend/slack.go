@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -121,13 +123,32 @@ func (s *SlackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 			if err != nil {
 				return fmt.Errorf("error converting image: %v", err)
 			}
-			s.imgcache.Set("/image/"+ev.Msg.Channel, img, 1*time.Hour)
+
+			// Create a random GUID for this image
+			var buf [16]byte
+			if _, err := rand.Read(buf[:]); err != nil {
+				return fmt.Errorf("error acquiring random: %v", err)
+			}
+			guid := hex.EncodeToString(buf[:])
+
+			// Resized images are cached for 30 days (arbitrary)
+			s.imgcache.Set("/image/"+guid, img, 30*24*time.Hour)
+
+			// Set this image as "current" for this channel for 15 minutes.
+			// If a message is sent within 15 minutes, it will use this image
+			s.imgcache.Set("/channel/"+ev.Msg.Channel, "/image/"+guid, 15*time.Minute)
 		}
 	}
 
 	// If there's not text to send, don't do anything
 	if m == "" {
 		return nil
+	}
+
+	// Get last image seen on this channel (if not expired)
+	var imgurl string
+	if s.imgcache.Get("/channel/"+ev.Msg.Channel, &imgurl) == nil {
+		imgurl = env.ServerUrl + imgurl
 	}
 
 	// value is passed to message handler when request is approved.
@@ -137,6 +158,7 @@ func (s *SlackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 		Color:      "#f9a41b",
 		CallbackID: "cryptofax",
 		Text:       m,
+		ImageURL:   imgurl, // use last image seen in this channel, if any
 		Actions: []slack.AttachmentAction{
 			{
 				Name:  actionStart,
