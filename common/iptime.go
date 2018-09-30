@@ -90,9 +90,9 @@ func PollTimezone() {
 	}
 }
 
-// NowAtIpLoc is like time.Now(), but returns a time adjusted with the current
+// NowHere is like time.Now(), but returns a time adjusted with the current
 // location (if known).
-func NowAtIpLoc() time.Time {
+func NowHere() time.Time {
 	if loc := currentLoc.Load(); loc != nil {
 		return time.Now().In(loc.(*time.Location))
 	}

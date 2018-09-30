@@ -13,7 +13,7 @@ func main() {
 	fmt.Println("Premi ENTER per suonare l'audio...")
 	fmt.Scanln()
 
-	t := common.NowAtIpLoc()
+	t := common.NowHere()
 	if t.Hour() >= 9 && t.Hour() <= 20 {
 		fmt.Printf("Qui sono le %02d:%02d, quindi posso fare casino\n", t.Hour(), t.Minute())
 		exec.Command("play", "modem.ogg").Run()
