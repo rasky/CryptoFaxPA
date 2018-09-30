@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/nlopes/slack"
+	"github.com/nlopes/slack/slackevents"
 )
 
 const (
@@ -47,6 +49,41 @@ func (s *SlackListener) ListenAndResponse() {
 				log.Printf("[ERROR] Failed to handle message: %s", err)
 			}
 		}
+	}
+}
+
+func (s *SlackListener) HandleEventsAPI(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body),
+		slackevents.OptionVerifyToken(&slackevents.TokenComparator{s.token}))
+	if e != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	switch eventsAPIEvent.Type {
+	case slackevents.URLVerification:
+		var r *slackevents.ChallengeResponse
+		err := json.Unmarshal([]byte(body), &r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text")
+		w.Write([]byte(r.Challenge))
+
+	case slackevents.CallbackEvent:
+		// postParams := slack.PostMessageParameters{}
+		// innerEvent := eventsAPIEvent.InnerEvent
+		// switch ev := innerEvent.Data.(type) {
+		// case *slackevents.AppMentionEvent:
+		// 	// api.PostMessage(ev.Channel, "Yes, hello.", postParams)
+		// }
 	}
 }
 

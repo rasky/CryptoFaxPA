@@ -76,6 +76,10 @@ func _main(args []string) int {
 		imgcache:          imgcache,
 	})
 
+	// Register handle to use Events API; for now this is a simple workaround
+	// to restart the dyno if Heroku sends it to sleep
+	http.HandleFunc("/events", slackListener.HandleEventsAPI)
+
 	http.HandleFunc("/image/", func(rw http.ResponseWriter, req *http.Request) {
 		var img []byte
 		if err := imgcache.Get(req.URL.Path, &img); err != nil {
