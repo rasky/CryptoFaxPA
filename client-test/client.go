@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	ClientId      = "raspberry"
-	ClientMqttQos = 2 // Use MQTT QOS=2 to make sure each message is delivered once
+	ClientId      = "test-client" // Change this in production
+	ClientMqttQos = 2             // Use MQTT QOS=2 to make sure each message is delivered once
 )
 
 func main() {
