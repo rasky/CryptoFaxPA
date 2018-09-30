@@ -3,6 +3,7 @@
 module github.com/rasky/realcrypto
 
 require (
+	github.com/antonholmquist/jason v1.0.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.1.1
 	github.com/esimov/dithergo v0.0.0-20170530095937-48e039c66812
