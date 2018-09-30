@@ -62,10 +62,11 @@ func _main(args []string) int {
 	client := slack.New(env.BotToken)
 	client.SetDebug(env.Debug)
 	slackListener := &SlackListener{
-		token:    env.BotToken,
-		client:   client,
-		botID:    env.BotID,
-		imgcache: imgcache,
+		token:     env.BotToken,
+		verftoken: env.VerificationToken,
+		client:    client,
+		botID:     env.BotID,
+		imgcache:  imgcache,
 	}
 	go slackListener.ListenAndResponse()
 

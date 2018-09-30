@@ -24,6 +24,7 @@ const (
 
 type SlackListener struct {
 	token     string
+	verftoken string
 	client    *slack.Client
 	imgcache  *ImageCache
 	botID     string
@@ -61,7 +62,7 @@ func (s *SlackListener) HandleEventsAPI(w http.ResponseWriter, r *http.Request) 
 	}
 
 	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body),
-		slackevents.OptionVerifyToken(&slackevents.TokenComparator{s.token}))
+		slackevents.OptionVerifyToken(&slackevents.TokenComparator{s.verftoken}))
 	if err != nil {
 		log.Printf("[ERROR] events API: parsing: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
