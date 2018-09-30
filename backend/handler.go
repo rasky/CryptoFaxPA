@@ -90,7 +90,7 @@ func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			panic(err) // programming error, structure not marshalable
 		}
 
-		token := mqtt.Publish(common.FaxMqttTopic, 1, false, payload)
+		token := mqtt.Publish(common.FaxMqttTopic, 2, false, payload)
 		if !token.WaitTimeout(5 * time.Second) {
 			log.Printf("[ERROR] timeout while publishing to cloudmqtt")
 			w.WriteHeader(http.StatusInternalServerError)

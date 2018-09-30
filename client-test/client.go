@@ -13,7 +13,7 @@ import (
 
 const (
 	ClientId      = "raspberry"
-	ClientMqttQos = 1 // Use MQTT QOS=1 to be more resilient on disconnections
+	ClientMqttQos = 2 // Use MQTT QOS=2 to make sure each message is delivered once
 )
 
 func main() {

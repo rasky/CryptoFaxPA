@@ -15,6 +15,7 @@ func createClientOptions(clientId string, uri *url.URL) *mqtt.ClientOptions {
 	password, _ := uri.User.Password()
 	opts.SetPassword(password)
 	opts.SetClientID(clientId)
+	opts.SetCleanSession(false)
 	return opts
 }
 
