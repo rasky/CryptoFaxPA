@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -34,7 +35,17 @@ func main() {
 			return
 		}
 
-		fmt.Printf("* New 📠 incoming: %+v\n", fax)
+		fmt.Printf("* New 📠 incoming:\n")
+		fmt.Printf("    - Sender: %v\n", fax.Sender)
+		fmt.Printf("    - Timestamp: %v\n", fax.Timestamp)
+		fmt.Printf("    - Message: %v\n", fax.Message)
+		if len(fax.Picture) != 0 {
+			fmt.Printf("    - Picture: %v bytes\n", len(fax.Picture))
+			if os.Getenv("TERM_PROGRAM") == "iTerm.app" {
+				fmt.Println()
+				fmt.Printf("\x1b]1337;File=width=40%%;inline=1:%s\x07\n", base64.StdEncoding.EncodeToString(fax.Picture))
+			}
+		}
 	})
 
 	select {} // wait forever
