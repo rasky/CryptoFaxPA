@@ -1,7 +1,7 @@
 package main
 
 import (
-  "bytes"
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"log"
@@ -14,7 +14,7 @@ import (
 
 const (
 	ClientId      = "client"
-	ClientMqttQos = 2             // Use MQTT QOS=2 to make sure each message is delivered once
+	ClientMqttQos = 2 // Use MQTT QOS=2 to make sure each message is delivered once
 )
 
 func main() {
@@ -35,9 +35,9 @@ func main() {
 			log.Printf("[ERROR] error decoding mqtt payload: %v", err)
 			return
 		}
-    
-    print_fax(fax)
-    
+
+		print_fax(fax)
+
 		fmt.Printf("* New 📠 incoming:\n")
 		fmt.Printf("    - Sender: %v\n", fax.Sender)
 		fmt.Printf("    - Timestamp: %v\n", fax.Timestamp)
@@ -55,19 +55,18 @@ func main() {
 }
 
 func print_fax(fax common.Fax) {
-  var buf bytes.Buffer;
-  buf.WriteString("\x1b!\x10") // double-height
-  fmt.Fprintf(&buf, "Fax from ")
-  buf.WriteString("\x1b!\x90") // double-height, underlined
-  fmt.Fprintf(&buf, "%v\n", fax.Sender)
-  
-  buf.WriteString("\x1b!\x00") // font A, single-height
-  fmt.Fprintf(&buf, "(%v)\n\n", fax.Timestamp.Format("2006-01-02 15:04"))
-  buf.WriteString(common.EncodeForPrinter(fax.Message))
-  buf.WriteString("\n")
-  
-  // TODO: print picture
-  
-  common.PrintBuffer(buf, true)
-}
+	var buf bytes.Buffer
+	buf.WriteString("\x1b!\x10") // double-height
+	fmt.Fprintf(&buf, "Fax from ")
+	buf.WriteString("\x1b!\x90") // double-height, underlined
+	fmt.Fprintf(&buf, "%v\n", fax.Sender)
 
+	buf.WriteString("\x1b!\x00") // font A, single-height
+	fmt.Fprintf(&buf, "(%v)\n\n", fax.Timestamp.Format("2006-01-02 15:04"))
+	buf.WriteString(common.EncodeForPrinter(fax.Message))
+	buf.WriteString("\n")
+
+	// TODO: print picture
+
+	common.PrintBuffer(buf, true)
+}
