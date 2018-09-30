@@ -53,22 +53,22 @@ func print_help() {
     buf.WriteString("CryptoFaxPA\n")
     
     buf.WriteString("\x1b!\x00") // font A, single-height
-    buf.WriteString(common.EncodeForPrinter(`CryptoFaxPA è il nuovo dispositivo pensato per la comunicazione digitale della pubblica amministrazione. Caratterizzato da un design elegante e minimale, è adatto ai moderni uffici di dirigenti e funzionari pubblici ma anche, perché no, alle loro abitazioni, dove sempre più spesso si svolge la comune attività lavorativa.
+    buf.Write(common.EncodeForPrinter(`CryptoFaxPA è il nuovo dispositivo pensato per la comunicazione digitale della pubblica amministrazione. Caratterizzato da un design elegante e minimale, è adatto ai moderni uffici di dirigenti e funzionari pubblici ma anche, perché no, alle loro abitazioni, dove sempre più spesso si svolge la comune attività lavorativa.
 In particolare CryptoFaxPA consente all'utente (d'ora in avanti denominato per semplicità "Diego") di rimanere aggiornato su tutte le novità e gli umori del suo amato Team.`))
     buf.WriteString("\n\n")
     
     buf.WriteString("\x1b!\x80") // font A, underlined
     buf.WriteString("Come funziona\n")
     buf.WriteString("\x1b!\x00") // font A, single-height
-    buf.WriteString(common.EncodeForPrinter(`Basterà mantenere il dispositivo connesso alla rete attraverso il WiFi o la rete GSM (inclusa) per ricevere, in qualsiasi momento, i preziosi messaggi.`))
+    buf.Write(common.EncodeForPrinter(`Basterà mantenere il dispositivo connesso alla rete attraverso il WiFi o la rete GSM (inclusa) per ricevere, in qualsiasi momento, i preziosi messaggi.`))
     buf.WriteString("\n\n")
     
     buf.WriteString("\x1b!\x80") // font A, underlined
     buf.WriteString("Configurazione WiFi\n")
     buf.WriteString("\x1b!\x00") // font A, single-height
-    buf.WriteString(common.EncodeForPrinter(`Se CryptoFaxPA non rileva una rete WiFi nota, trascorsi 120 secondi si avvia in modalità access point esponendo una rete wireless di nome CryptoFaxPA. A quel punto basterà accedervi con un qualsiasi altro device ed aprire la pagina http://cryptofaxpa.local, dove sarà possibile configurare la propria rete WiFi.`))
+    buf.Write(common.EncodeForPrinter(`Se CryptoFaxPA non rileva una rete WiFi nota, trascorsi 120 secondi si avvia in modalità access point esponendo una rete wireless di nome CryptoFaxPA. A quel punto basterà accedervi con un qualsiasi altro device ed aprire la pagina http://cryptofaxpa.local, dove sarà possibile configurare la propria rete WiFi.`))
     
-    common.PrintBuffer(buf, true)
+    common.PrintBytes(buf.Bytes(), true)
 }
 
 func print_blockchain() {
@@ -77,5 +77,5 @@ func print_blockchain() {
     buf.WriteString("\x1b!\x30") // double-height, double-width
     buf.WriteString("HAHAHAHAHAHAHAHAHAHAHAHA\n")
     
-    common.PrintBuffer(buf, true)
+    common.PrintBytes(buf.Bytes(), true)
 }

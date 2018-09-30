@@ -1,8 +1,8 @@
 package common
 
 import (
-	"io/ioutil"
-
+    "bufio"
+    "os"
 	"golang.org/x/text/encoding/charmap"
 )
 
@@ -22,10 +22,26 @@ func EncodeForPrinter(s string) (out []byte) {
 
 // Print raw (cp437-encoded) bytes to the printer
 func PrintBytes(buf []byte, feed_past_cutter bool) {
-	if feed_past_cutter {
-		buf = append(buf, "\n\n\n\n\n"...)
+	//ioutil.WriteFile("/dev/usb/lp0", buf, 0644)
+	
+	f, err := os.Create("/dev/usb/lp0")
+	if err != nil {
+		panic(err)
 	}
-	ioutil.WriteFile("/dev/usb/lp0", buf, 0644)
+	defer f.Close()
+    
+	w := bufio.NewWriter(f)
+	w.Write(buf)
+	w.Flush()
+	
+	f.Write([]byte("\n"))
+	if (feed_past_cutter) {
+	    f.Write([]byte("\n\n\n\n"))
+	}
+	w.Flush()
+	w.Flush()
+	
+	//fmt.Println(string(buf))
 }
 
 // Print a Unicode string to the printer, using EncodeForPrinter to convert it

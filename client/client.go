@@ -68,5 +68,5 @@ func print_fax(fax common.Fax) {
 
 	// TODO: print picture
 
-	common.PrintBuffer(buf.Bytes(), true)
+	common.PrintBytes(buf.Bytes(), true)
 }
