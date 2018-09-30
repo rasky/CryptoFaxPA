@@ -10,7 +10,6 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/rasky/realcrypto/common"
 	"github.com/vmihailenco/msgpack"
-  "golang.org/x/text/encoding/charmap"
 )
 
 const (
@@ -64,7 +63,7 @@ func print_fax(fax common.Fax) {
   
   buf.WriteString("\x1b!\x00") // font A, single-height
   fmt.Fprintf(&buf, "(%v)\n\n", fax.Timestamp.Format("2006-01-02 15:04"))
-  buf.WriteString(_enc(fax.Message))
+  buf.WriteString(common.EncodeForPrinter(fax.Message))
   buf.WriteString("\n")
   
   // TODO: print picture
@@ -72,11 +71,3 @@ func print_fax(fax common.Fax) {
   common.PrintBuffer(buf, true)
 }
 
-func _enc(s string) (string) {
-    s, err := charmap.CodePage437.NewEncoder().String(s)
-    if err != nil {
-        // the supplied message contains unsupported characters
-        fmt.Println(err)
-    }
-    return s
-}

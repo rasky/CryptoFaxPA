@@ -2,8 +2,19 @@ package common
 
 import (
     "bytes"
+    "fmt"
     "io/ioutil"
+    "golang.org/x/text/encoding/charmap"
 )
+
+func EncodeForPrinter(s string) (string) {
+    s, err := charmap.CodePage437.NewEncoder().String(s)
+    if err != nil {
+        // the supplied message contains unsupported characters
+        fmt.Println(err)
+    }
+    return s
+}
 
 func PrintBytes(buf []byte, feed_past_cutter bool) {
     if feed_past_cutter {
