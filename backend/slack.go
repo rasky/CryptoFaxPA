@@ -55,13 +55,15 @@ func (s *SlackListener) ListenAndResponse() {
 func (s *SlackListener) HandleEventsAPI(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		log.Printf("[ERROR] events API: reading request: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body),
+	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body),
 		slackevents.OptionVerifyToken(&slackevents.TokenComparator{s.token}))
-	if e != nil {
+	if err != nil {
+		log.Printf("[ERROR] events API: parsing: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -71,6 +73,7 @@ func (s *SlackListener) HandleEventsAPI(w http.ResponseWriter, r *http.Request) 
 		var r *slackevents.ChallengeResponse
 		err := json.Unmarshal([]byte(body), &r)
 		if err != nil {
+			log.Printf("[ERROR] events API: challenge: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
