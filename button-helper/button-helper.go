@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/rasky/realcrypto/common"
+	rpio "github.com/stianeikeland/go-rpio"
 )
 
 func main() {
