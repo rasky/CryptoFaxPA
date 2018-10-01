@@ -19,31 +19,25 @@ func main() {
 	defer rpio.Close()
 
 	// connect to the button pins and initialize them
-	help_pin := rpio.Pin(18)
+	help_pin := rpio.Pin(22)
 	help_pin.Input()
-	help_pin.PullDown()
-	help_pin.Detect(rpio.RiseEdge)
-	blockchain_pin := rpio.Pin(17)
+	help_pin.PullOff()
+	blockchain_pin := rpio.Pin(23)
 	blockchain_pin.Input()
-	blockchain_pin.PullDown()
-	blockchain_pin.Detect(rpio.RiseEdge)
+	blockchain_pin.PullOff()
 
 	// loop forever
 	for {
-		if help_pin.EdgeDetected() {
+	    fmt.Println("looping...")
+		if help_pin.Read() == rpio.Low {
 			fmt.Println("help button pressed")
 			print_help()
-
-			// wait a bit before looping again
-			time.Sleep(2000 * time.Millisecond)
 		}
-		if blockchain_pin.EdgeDetected() {
+		if blockchain_pin.Read() == rpio.Low {
 			fmt.Println("blockchain button pressed")
 			print_blockchain()
-
-			// wait a bit before looping again
-			time.Sleep(2000 * time.Millisecond)
 		}
+		time.Sleep(time.Second / 2)
 	}
 }
 
