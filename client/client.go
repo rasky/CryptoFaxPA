@@ -20,8 +20,8 @@ const (
 	ClientId      = "client"
 	ClientMqttQos = 2 // Use MQTT QOS=2 to make sure each message is delivered once
 
-	PinHelp       = 18
-	PinBlockchain = 17
+	PinHelp       = 22
+	PinBlockchain = 23
 )
 
 var (
@@ -89,8 +89,10 @@ func main() {
 			}
 			switch evt.Pin {
 			case PinHelp:
+			    fmt.Println("help button pressed")
 				print_help()
 			case PinBlockchain:
+			    fmt.Println("blockchain button pressed")
 				print_blockchain()
 			}
 		case <-chfax:

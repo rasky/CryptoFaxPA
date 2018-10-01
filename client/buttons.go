@@ -39,8 +39,8 @@ func NewRPButtonMonitor(pinids ...int) *RPButtonMonitor {
 	for _, id := range pinids {
 		pin := rpio.Pin(id)
 		pin.Input()
-		pin.PullDown()
-		pin.Detect(rpio.RiseEdge)
+		pin.PullOff()
+		pin.Detect(rpio.FallEdge)
 		mon.pins = append(mon.pins, pin)
 	}
 
