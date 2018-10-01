@@ -26,6 +26,9 @@ func main() {
 		log.Fatal("CLOUDMQTT_URL not defined")
 	}
 
+	// Start background bootstrap sound
+	go exec.Command("play", "startup.ogg").Run()
+
 	// Start polling timezone in background
 	go common.PollTimezone()
 
@@ -67,6 +70,11 @@ func main() {
 
 	help_pin := NewRPButton(18)
 	blockchain_pin := NewRPButton(17)
+
+	// Wait for startup sound to finish before begin processing events.
+	// This avoids the modem sound to play over the startup sound in case
+	// a fax is immediately available after boot.
+	time.Sleep(5 * time.Second)
 
 	// Main loop: serialize all printing to avoid printing from different
 	// goroutines at the same time.
