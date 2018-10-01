@@ -1,6 +1,7 @@
 package main
 
 import (
+	"runtime"
 	"time"
 
 	rpio "github.com/stianeikeland/go-rpio"
@@ -12,6 +13,12 @@ type RPButton struct {
 }
 
 func NewRPButton(pinid int) *RPButton {
+	if runtime.GOOS == "darwin" { // debuggin mode
+		return &RPButton{
+			Edges: make(chan time.Time),
+		}
+	}
+
 	pin := rpio.Pin(pinid)
 	pin.Input()
 	pin.PullDown()
