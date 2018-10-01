@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -24,6 +25,9 @@ func main() {
 	if surl == "" {
 		log.Fatal("CLOUDMQTT_URL not defined")
 	}
+
+	// Start polling timezone in background
+	go common.PollTimezone()
 
 	c, err := common.NewMqttClient(ClientId, surl)
 	if err != nil {
@@ -79,6 +83,16 @@ func main() {
 				print_blockchain()
 			}
 		case fax := <-chfax:
+			// Se non è notte fonda, suona la musichetta del modem mentre
+			// inizia a stampare il fax
+			t := common.NowHere()
+			if t.Hour() >= 9 && t.Hour() <= 20 {
+				go exec.Command("play", "modem.ogg").Run()
+
+				// Fai suonare un po' la musichetta prima di iniziare a stampare
+				time.Sleep(5 * time.Second)
+			}
+
 			print_fax(fax)
 		}
 	}
