@@ -63,16 +63,16 @@ func print_fax(fax common.Fax) {
 
 	buf.WriteString("\x1b!\x00") // font A, single-height
 	fmt.Fprintf(&buf, "(%v)\n\n", fax.Timestamp.Format("2006-01-02 15:04"))
-	
+
 	if fax.Message != "" {
-    buf.Write(common.EncodeForPrinter(fax.Message))
-    buf.WriteString("\n")
-  }
-  
+		buf.Write(common.EncodeForPrinter(fax.Message))
+		buf.WriteString("\n")
+	}
+
 	if len(fax.Picture) != 0 {
-	  common.PrintBytes(buf.Bytes(), false)
-	  common.PrintImage(fax.Picture, true)
+		common.PrintBytes(buf.Bytes(), false)
+		common.PrintImage(fax.Picture, true)
 	} else {
-  	common.PrintBytes(buf.Bytes(), true)
-  }
+		common.PrintBytes(buf.Bytes(), true)
+	}
 }
