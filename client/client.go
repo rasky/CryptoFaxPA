@@ -9,18 +9,19 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"runtime"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/rasky/realcrypto/common"
-	rpio "github.com/stianeikeland/go-rpio"
 	"github.com/vmihailenco/msgpack"
 )
 
 const (
 	ClientId      = "client"
 	ClientMqttQos = 2 // Use MQTT QOS=2 to make sure each message is delivered once
+
+	PinHelp       = 18
+	PinBlockchain = 17
 )
 
 var (
@@ -69,16 +70,8 @@ func main() {
 		chfax <- true
 	})
 
-	if runtime.GOOS != "darwin" {
-		if err := rpio.Open(); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		defer rpio.Close()
-	}
-
-	help_pin := NewRPButton(18)
-	blockchain_pin := NewRPButton(17)
+	buttonMonitor := NewRPButtonMonitor(PinHelp, PinBlockchain)
+	defer buttonMonitor.Shutdown()
 
 	// Wait for startup sound to finish before begin processing events.
 	// This avoids the modem sound to play over the startup sound in case
@@ -89,14 +82,15 @@ func main() {
 	// goroutines at the same time.
 	for {
 		select {
-		case t := <-help_pin.Edges:
+		case evt := <-buttonMonitor.Events:
 			// Don't process buttons if they were pressed too long ago
-			if time.Since(t) < time.Second/2 {
-				print_help()
+			if time.Since(evt.When) > time.Second/2 {
+				continue
 			}
-		case t := <-blockchain_pin.Edges:
-			// Don't process buttons if they were pressed too long ago
-			if time.Since(t) < time.Second/2 {
+			switch evt.Pin {
+			case PinHelp:
+				print_help()
+			case PinBlockchain:
 				print_blockchain()
 			}
 		case <-chfax:
