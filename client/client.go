@@ -235,7 +235,6 @@ func print_blockchain() {
 	buf.WriteString("BLOCKCHAIN SUPER NERD INFO\n")
 
 	buf.WriteString("\x1b!\x00") // font A, single-height
-	fmt.Fprintln(&buf, "Blockchain super nerd info:")
 	fmt.Fprintln(&buf, "Current BTC price (USD):", httpGetString("https://blockchain.info/q/24hrprice"))
 	fmt.Fprintln(&buf, "Market cap (USD):", httpGetString("https://blockchain.info/q/marketcap"))
 	fmt.Fprintln(&buf, "Global hash rate (GigaHash):", httpGetString("https://blockchain.info/q/hashrate"))
