@@ -9,6 +9,7 @@ require (
 	github.com/esimov/dithergo v0.0.0-20170530095937-48e039c66812
 	github.com/go-redis/cache v6.3.5+incompatible
 	github.com/go-redis/redis v6.14.1+incompatible
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/kr/pretty v0.1.0 // indirect
@@ -22,6 +23,8 @@ require (
 	github.com/stianeikeland/go-rpio v3.0.1-0.20180606224349-3abdd2207d33+incompatible
 	github.com/stretchr/testify v1.2.2 // indirect
 	github.com/vmihailenco/msgpack v4.0.0+incompatible
+	github.com/wcharczuk/go-chart v2.0.1+incompatible
+	golang.org/x/image v0.0.0-20180926015637-991ec62608f3 // indirect
 	golang.org/x/net v0.0.0-20180926154720-4dfa2610cdf3 // indirect
 	golang.org/x/text v0.3.0
 	google.golang.org/appengine v1.2.0 // indirect

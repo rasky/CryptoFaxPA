@@ -5,10 +5,13 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -89,10 +92,10 @@ func main() {
 			}
 			switch evt.Pin {
 			case PinHelp:
-			    fmt.Println("help button pressed")
+				fmt.Println("help button pressed")
 				print_help()
 			case PinBlockchain:
-			    fmt.Println("blockchain button pressed")
+				fmt.Println("blockchain button pressed")
 				print_blockchain()
 			}
 		case <-chfax:
@@ -144,7 +147,7 @@ func print_fax_from_spool() {
 		go exec.Command("play", "modem.ogg").Run()
 
 		// Fai suonare un po' la musichetta prima di iniziare a stampare
-		time.Sleep(5 * time.Second)
+		time.Sleep(6 * time.Second)
 	}
 
 	print_fax(fax)
@@ -198,11 +201,58 @@ In particolare CryptoFaxPA consente all'utente (d'ora in avanti denominato per s
 	common.PrintBytes(buf.Bytes(), true)
 }
 
+func httpGetString(url string) string {
+	res, err := http.Get(url)
+	if err != nil {
+		return ""
+	}
+	var buf bytes.Buffer
+	io.Copy(&buf, res.Body)
+	res.Body.Close()
+	return buf.String()
+}
+
+func satoshis(s string) string {
+	v, err := strconv.ParseInt(s, 10, 64)
+	if err == nil {
+		return fmt.Sprintf("%.8f", float64(v)/float64(100000000))
+	}
+	return s
+}
+
+func seconds(s string) string {
+	v, err := strconv.ParseFloat(s, 64)
+	if err == nil {
+		return fmt.Sprintf("%v", time.Duration(v*1000000000))
+	}
+	return s
+}
+
 func print_blockchain() {
 	var buf bytes.Buffer
 
 	buf.WriteString("\x1b!\x30") // double-height, double-width
-	buf.WriteString("HAHAHAHAHAHAHAHAHAHAHAHA\n")
+	buf.WriteString("BLOCKCHAIN SUPER NERD INFO\n")
 
+	buf.WriteString("\x1b!\x00") // font A, single-height
+	fmt.Fprintln(&buf, "Blockchain super nerd info:")
+	fmt.Fprintln(&buf, "Current BTC price (USD):", httpGetString("https://blockchain.info/q/24hrprice"))
+	fmt.Fprintln(&buf, "Market cap (USD):", httpGetString("https://blockchain.info/q/marketcap"))
+	fmt.Fprintln(&buf, "Global hash rate (GigaHash):", httpGetString("https://blockchain.info/q/hashrate"))
+	fmt.Fprintln(&buf, "Current difficulty target:", httpGetString("https://blockchain.info/q/getdifficulty"))
+	fmt.Fprintln(&buf, "Current block height:", httpGetString("https://blockchain.info/q/getblockcount"))
+	fmt.Fprintln(&buf, "Latest hash:", httpGetString("https://blockchain.info/q/latesthash"))
+	fmt.Fprintln(&buf, "Current block reward:", satoshis(httpGetString("https://blockchain.info/q/bcperblock")))
+	fmt.Fprintln(&buf, "Total bitcoins:", satoshis(httpGetString("https://blockchain.info/q/totalbc")))
+	fmt.Fprintln(&buf, "Probability of mining:", httpGetString("https://blockchain.info/q/probability"))
+	fmt.Fprintln(&buf, "ETA until next block:", seconds(httpGetString("https://blockchain.info/q/eta")))
 	common.PrintBytes(buf.Bytes(), true)
+
+	graph := GetBitcoinGraph()
+	if graph != nil {
+		buf.WriteString("\x1b!\x30") // double-height, double-width
+		buf.WriteString("BLOCKCHAIN LIVE EXCHANGE\n")
+
+		common.PrintImage(graph, true)
+	}
 }
