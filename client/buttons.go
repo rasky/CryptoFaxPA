@@ -40,7 +40,6 @@ func NewRPButtonMonitor(pinids ...int) *RPButtonMonitor {
 		pin := rpio.Pin(id)
 		pin.Input()
 		pin.PullOff()
-		pin.Detect(rpio.FallEdge)
 		mon.pins = append(mon.pins, pin)
 	}
 
@@ -59,7 +58,7 @@ func (mon *RPButtonMonitor) Shutdown() {
 func (mon *RPButtonMonitor) detectEdges() {
 	for atomic.LoadInt32(&mon.exit) == 0 {
 		for _, pin := range mon.pins {
-			if pin.EdgeDetected() {
+			if pin.Read() == rpio.Low {
 				mon.Events <- RPButtonEvent{
 					Pin:  int(pin),
 					When: time.Now(),
