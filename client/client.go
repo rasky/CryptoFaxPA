@@ -198,14 +198,15 @@ In particolare CryptoFaxPA consente all'utente (d'ora in avanti denominato per s
 	buf.WriteString("Configurazione WiFi\n")
 	buf.WriteString("\x1b!\x00") // font A, single-height
 	buf.Write(common.EncodeForPrinter(`Se CryptoFaxPA non rileva una rete WiFi nota, trascorsi 120 secondi si avvia in modalità access point esponendo una rete wireless di nome CryptoFaxPA. A quel punto basterà accedervi con un qualsiasi altro device ed aprire la pagina http://cryptofaxpa.local, dove sarà possibile configurare la propria rete WiFi.`))
-
-	// print network addresses
-	out, err := exec.Command("/sbin/ifconfig | /usr/bin/awk -v RS=\"\n\n\" '{ for (i=1; i<=NF; i++) if ($i == \"inet\") address = $(i+1); if (address != \"127.0.0.1\") printf \"%s\t%s\n\", $1, address }'").Output()
-	if err != nil {
-		buf.Write(out)
-		buf.WriteString("\n\n")
-	}
-
+    
+    // print network addresses
+    out, err := exec.Command("/bin/bash", "-c", `/sbin/ifconfig | /usr/bin/awk -v RS="\n\n" '{ for (i=1; i<=NF; i++) if ($i == "inet") address = $(i+1); if (address != "127.0.0.1") printf "%s\t%s\n", $1, address }'`).Output()
+    if err == nil {
+        buf.WriteString("\n\n")
+        buf.Write(out)
+        buf.WriteString("\n\n")
+    }
+    
 	common.PrintBytes(buf.Bytes(), true)
 }
 
