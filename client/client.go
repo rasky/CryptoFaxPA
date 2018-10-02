@@ -61,18 +61,7 @@ func main() {
 		}()
 	}
 
-	c, err := common.NewMqttClient(ClientId, surl)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer c.Disconnect(0)
-
-	c.Subscribe(common.FaxMqttTopic, ClientMqttQos, func(client mqtt.Client, msg mqtt.Message) {
-		// Use a filename whose alphabetical sorting respects the order of arrival
-		filename := fmt.Sprintf("%s/%016x", *flagSpoolDir, time.Now().Unix())
-		common.WriteFileSync(filename, msg.Payload(), 0777)
-		chfax <- true
-	})
+	go PollMqtt(chfax, surl)
 
 	buttonMonitor := NewRPButtonMonitor(PinHelp, PinBlockchain)
 	defer buttonMonitor.Shutdown()
@@ -103,6 +92,37 @@ func main() {
 			print_fax_from_spool()
 		}
 	}
+}
+
+func PollMqtt(chfax chan bool, surl string) {
+	var c mqtt.Client
+	sleep := 5 * time.Second
+	for {
+		var err error
+		c, err = common.NewMqttClient(ClientId, surl)
+		if err != nil {
+			log.Printf("[INFO] cannot connect to MQTT server: %v", err)
+			log.Printf("[INFO] retrying in %v...", sleep)
+			time.Sleep(sleep)
+			sleep = sleep + sleep/3
+			if sleep > 5*time.Minute {
+				sleep = 5 * time.Minute
+			}
+		} else {
+			break
+		}
+	}
+	defer c.Disconnect(0)
+
+	c.Subscribe(common.FaxMqttTopic, ClientMqttQos, func(client mqtt.Client, msg mqtt.Message) {
+		// Use a filename whose alphabetical sorting respects the order of arrival
+		filename := fmt.Sprintf("%s/%016x", *flagSpoolDir, time.Now().Unix())
+		common.WriteFileSync(filename, msg.Payload(), 0777)
+		chfax <- true
+	})
+
+	log.Printf("[INFO] connected to MQTT server, start polling")
+	select {}
 }
 
 func print_fax_from_spool() {
