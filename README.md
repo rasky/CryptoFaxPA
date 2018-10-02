@@ -10,6 +10,7 @@ This repository contains source code for the new model of CryptoFaxPA.
 
 ## Repository contents:
 
+* `cryptofax.scad`: 3D model
 * `backend`: contains the bot that reacts to Slack messages and preprocesses them before adding them to a MQTT queue
 * `client`: contains the client that runs on the CryptoFaxPA device
 * `common`: contains common code shared by the other components
