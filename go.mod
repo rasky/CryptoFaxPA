@@ -5,6 +5,7 @@ module github.com/rasky/CryptoFaxPA
 require (
 	github.com/antonholmquist/jason v1.0.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dustin/go-humanize v0.0.0-20180713052910-9f541cc9db5d
 	github.com/eclipse/paho.mqtt.golang v1.1.1
 	github.com/esimov/dithergo v0.0.0-20170530095937-48e039c66812
 	github.com/go-redis/cache v6.3.5+incompatible

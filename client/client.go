@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"time"
 
+	humanize "github.com/dustin/go-humanize"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/rasky/CryptoFaxPA/common"
 	"github.com/vmihailenco/msgpack"
@@ -75,6 +76,8 @@ func main() {
 
 	buttonMonitor := NewRPButtonMonitor(PinHelp, PinBlockchain)
 	defer buttonMonitor.Shutdown()
+
+	print_blockchain()
 
 	// Wait for startup sound to finish before begin processing events.
 	// This avoids the modem sound to play over the startup sound in case
@@ -228,6 +231,14 @@ func seconds(s string) string {
 	return s
 }
 
+func human(s string) string {
+	v, err := strconv.ParseFloat(s, 64)
+	if err == nil {
+		return fmt.Sprintf("%v", humanize.Comma(int64(v)))
+	}
+	return s
+}
+
 func print_blockchain() {
 	var buf bytes.Buffer
 
@@ -235,10 +246,10 @@ func print_blockchain() {
 	buf.WriteString("BLOCKCHAIN SUPER NERD INFO\n")
 
 	buf.WriteString("\x1b!\x00") // font A, single-height
-	fmt.Fprintln(&buf, "Current BTC price (USD):\n", httpGetString("https://blockchain.info/q/24hrprice"))
-	fmt.Fprintln(&buf, "Market cap (USD):\n", httpGetString("https://blockchain.info/q/marketcap"))
-	fmt.Fprintln(&buf, "Global hash rate (GigaHash):\n", httpGetString("https://blockchain.info/q/hashrate"))
-	fmt.Fprintln(&buf, "Current difficulty target:\n", httpGetString("https://blockchain.info/q/getdifficulty"))
+	fmt.Fprintln(&buf, "Current BTC price (USD):\n", "$"+httpGetString("https://blockchain.info/q/24hrprice"))
+	fmt.Fprintln(&buf, "Market cap (USD):\n", "$"+human(httpGetString("https://blockchain.info/q/marketcap")))
+	fmt.Fprintln(&buf, "Global hash rate (GigaHash):\n", human(httpGetString("https://blockchain.info/q/hashrate")))
+	fmt.Fprintln(&buf, "Current difficulty target:\n", human(httpGetString("https://blockchain.info/q/getdifficulty")))
 	fmt.Fprintln(&buf, "Current block height:\n", httpGetString("https://blockchain.info/q/getblockcount"))
 	fmt.Fprintln(&buf, "Latest hash:\n", httpGetString("https://blockchain.info/q/latesthash"))
 	fmt.Fprintln(&buf, "Current block reward:\n", satoshis(httpGetString("https://blockchain.info/q/bcperblock")))
