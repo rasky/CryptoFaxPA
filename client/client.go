@@ -160,7 +160,10 @@ func print_fax_from_spool() {
 			fmt.Printf("\x1b]1337;File=width=40%%;inline=1:%s\x07\n", base64.StdEncoding.EncodeToString(fax.Picture))
 		}
 	}
-
+    
+    common.StartBlinking()
+    defer common.StopBlinking()
+    
 	// Se non è notte fonda, suona la musichetta del modem mentre
 	// inizia a stampare il fax
 	t := common.NowHere()
@@ -198,6 +201,9 @@ func print_fax(fax common.Fax) {
 }
 
 func print_help() {
+    common.StartBlinking()
+    defer common.StopBlinking()
+    
 	var buf bytes.Buffer
 
 	buf.WriteString("\x1b!\x30") // double-height, double-width
@@ -266,6 +272,9 @@ func human(s string) string {
 }
 
 func print_blockchain() {
+    common.StartBlinking()
+    defer common.StopBlinking()
+    
 	var buf bytes.Buffer
 
 	buf.WriteString("\x1b!\x30") // double-height, double-width
