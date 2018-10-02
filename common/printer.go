@@ -37,7 +37,8 @@ func min(x, y int) int {
 func PrintBytes(buf []byte, feed_past_cutter bool) {
 	f, err := os.Create("/dev/usb/lp0")
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 	defer f.Close()
 
