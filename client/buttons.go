@@ -63,6 +63,7 @@ func (mon *RPButtonMonitor) detectEdges() {
 					Pin:  int(pin),
 					When: time.Now(),
 				}
+		        time.Sleep(1 * time.Second)
 			}
 		}
 		time.Sleep(50 * time.Millisecond)
