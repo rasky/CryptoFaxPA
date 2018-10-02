@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/rasky/realcrypto/common"
+	"github.com/rasky/CryptoFaxPA/common"
 )
 
 func main() {

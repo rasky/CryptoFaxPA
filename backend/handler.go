@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/rasky/realcrypto/common"
+	"github.com/rasky/CryptoFaxPA/common"
 
 	"github.com/nlopes/slack"
 	"github.com/vmihailenco/msgpack"

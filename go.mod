@@ -1,6 +1,6 @@
 // +heroku install ./backend
 
-module github.com/rasky/realcrypto
+module github.com/rasky/CryptoFaxPA
 
 require (
 	github.com/antonholmquist/jason v1.0.0

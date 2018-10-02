@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/rasky/realcrypto/common"
+	"github.com/rasky/CryptoFaxPA/common"
 	rpio "github.com/stianeikeland/go-rpio"
 )
 
@@ -28,7 +28,7 @@ func main() {
 
 	// loop forever
 	for {
-	    fmt.Println("looping...")
+		fmt.Println("looping...")
 		if help_pin.Read() == rpio.Low {
 			fmt.Println("help button pressed")
 			print_help()
