@@ -63,7 +63,14 @@ func (mon *RPButtonMonitor) detectEdges() {
 					Pin:  int(pin),
 					When: time.Now(),
 				}
-		        time.Sleep(1 * time.Second)
+				
+				// wait until button is released
+				for {
+				    if (pin.Read() == rpio.High) {
+				        break;
+				    }
+		            time.Sleep(50 * time.Millisecond)
+				}
 			}
 		}
 		time.Sleep(50 * time.Millisecond)
