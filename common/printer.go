@@ -95,7 +95,7 @@ func PrintImage(pngimg []byte, feed_past_cutter bool) {
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			// black = 1, white = 0
-			bits[y*imgWidth+x] = color.GrayModel.Convert(imgobj.At(x, y)).(color.Gray).Y < 128
+			bits[y*imgWidth+x] = color.GrayModel.Convert(imgobj.At(x, y)).(color.Gray).Y < 224
 		}
 	}
 

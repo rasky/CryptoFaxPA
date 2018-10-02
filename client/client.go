@@ -235,22 +235,25 @@ func print_blockchain() {
 	buf.WriteString("BLOCKCHAIN SUPER NERD INFO\n")
 
 	buf.WriteString("\x1b!\x00") // font A, single-height
-	fmt.Fprintln(&buf, "Current BTC price (USD):", httpGetString("https://blockchain.info/q/24hrprice"))
-	fmt.Fprintln(&buf, "Market cap (USD):", httpGetString("https://blockchain.info/q/marketcap"))
-	fmt.Fprintln(&buf, "Global hash rate (GigaHash):", httpGetString("https://blockchain.info/q/hashrate"))
-	fmt.Fprintln(&buf, "Current difficulty target:", httpGetString("https://blockchain.info/q/getdifficulty"))
-	fmt.Fprintln(&buf, "Current block height:", httpGetString("https://blockchain.info/q/getblockcount"))
-	fmt.Fprintln(&buf, "Latest hash:", httpGetString("https://blockchain.info/q/latesthash"))
-	fmt.Fprintln(&buf, "Current block reward:", satoshis(httpGetString("https://blockchain.info/q/bcperblock")))
-	fmt.Fprintln(&buf, "Total bitcoins:", satoshis(httpGetString("https://blockchain.info/q/totalbc")))
-	fmt.Fprintln(&buf, "Probability of mining:", httpGetString("https://blockchain.info/q/probability"))
-	fmt.Fprintln(&buf, "ETA until next block:", seconds(httpGetString("https://blockchain.info/q/eta")))
+	fmt.Fprintln(&buf, "Current BTC price (USD):\n", httpGetString("https://blockchain.info/q/24hrprice"))
+	fmt.Fprintln(&buf, "Market cap (USD):\n", httpGetString("https://blockchain.info/q/marketcap"))
+	fmt.Fprintln(&buf, "Global hash rate (GigaHash):\n", httpGetString("https://blockchain.info/q/hashrate"))
+	fmt.Fprintln(&buf, "Current difficulty target:\n", httpGetString("https://blockchain.info/q/getdifficulty"))
+	fmt.Fprintln(&buf, "Current block height:\n", httpGetString("https://blockchain.info/q/getblockcount"))
+	fmt.Fprintln(&buf, "Latest hash:\n", httpGetString("https://blockchain.info/q/latesthash"))
+	fmt.Fprintln(&buf, "Current block reward:\n", satoshis(httpGetString("https://blockchain.info/q/bcperblock")))
+	fmt.Fprintln(&buf, "Total bitcoins:\n", satoshis(httpGetString("https://blockchain.info/q/totalbc")))
+	fmt.Fprintln(&buf, "Probability of mining:\n", httpGetString("https://blockchain.info/q/probability"))
+	fmt.Fprintln(&buf, "ETA until next block:\n", seconds(httpGetString("https://blockchain.info/q/eta")))
 	common.PrintBytes(buf.Bytes(), true)
 
 	graph := GetBitcoinGraph()
 	if graph != nil {
+		var buf bytes.Buffer
 		buf.WriteString("\x1b!\x30") // double-height, double-width
 		buf.WriteString("BLOCKCHAIN LIVE EXCHANGE\n")
+		buf.WriteString("\x1b!\x00") // font A, single-height
+		common.PrintBytes(buf.Bytes(), false)
 
 		common.PrintImage(graph, true)
 	}
