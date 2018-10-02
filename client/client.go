@@ -77,8 +77,6 @@ func main() {
 	buttonMonitor := NewRPButtonMonitor(PinHelp, PinBlockchain)
 	defer buttonMonitor.Shutdown()
 
-	print_blockchain()
-
 	// Wait for startup sound to finish before begin processing events.
 	// This avoids the modem sound to play over the startup sound in case
 	// a fax is immediately available after boot.
@@ -200,14 +198,14 @@ In particolare CryptoFaxPA consente all'utente (d'ora in avanti denominato per s
 	buf.WriteString("Configurazione WiFi\n")
 	buf.WriteString("\x1b!\x00") // font A, single-height
 	buf.Write(common.EncodeForPrinter(`Se CryptoFaxPA non rileva una rete WiFi nota, trascorsi 120 secondi si avvia in modalità access point esponendo una rete wireless di nome CryptoFaxPA. A quel punto basterà accedervi con un qualsiasi altro device ed aprire la pagina http://cryptofaxpa.local, dove sarà possibile configurare la propria rete WiFi.`))
-    
-    // print network addresses
-    out, err := exec.Command("/sbin/ifconfig | /usr/bin/awk -v RS=\"\n\n\" '{ for (i=1; i<=NF; i++) if ($i == \"inet\") address = $(i+1); if (address != \"127.0.0.1\") printf \"%s\t%s\n\", $1, address }'").Output()
-    if err != nil {
-        buf.Write(out)
-        buf.WriteString("\n\n")
-    }
-    
+
+	// print network addresses
+	out, err := exec.Command("/sbin/ifconfig | /usr/bin/awk -v RS=\"\n\n\" '{ for (i=1; i<=NF; i++) if ($i == \"inet\") address = $(i+1); if (address != \"127.0.0.1\") printf \"%s\t%s\n\", $1, address }'").Output()
+	if err != nil {
+		buf.Write(out)
+		buf.WriteString("\n\n")
+	}
+
 	common.PrintBytes(buf.Bytes(), true)
 }
 
@@ -251,8 +249,9 @@ func print_blockchain() {
 
 	buf.WriteString("\x1b!\x30") // double-height, double-width
 	buf.WriteString("BLOCKCHAIN SUPER NERD INFO\n")
-
 	buf.WriteString("\x1b!\x00") // font A, single-height
+	fmt.Fprintln(&buf, "Updated at:", common.NowHere())
+
 	fmt.Fprintln(&buf, "Current BTC price (USD):\n", "$"+httpGetString("https://blockchain.info/q/24hrprice"))
 	fmt.Fprintln(&buf, "Market cap (USD):\n", "$"+human(httpGetString("https://blockchain.info/q/marketcap")))
 	fmt.Fprintln(&buf, "Global hash rate (GigaHash):\n", human(httpGetString("https://blockchain.info/q/hashrate")))
