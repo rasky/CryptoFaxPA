@@ -22,7 +22,7 @@ Make sure you have Go 1.11 and issue `GOOS=linux GOARCH=arm go build` on your ma
 ## Authors
 
 * Giovanni Bajo (software)
-* Laura Bordin (packaging)
+* Laura Bordin (packaging & leaflet)
 * Matteo De Santi (product design & packaging)
 * Elisabetta Pique' (project manager)
 * Alessandro Ranellucci (hardware & software)
