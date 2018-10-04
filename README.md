@@ -1,6 +1,6 @@
 # CryptoFaxPA 2.0 📠
 
-This repository contains source code for the new model of CryptoFaxPA.
+After the huge success of the [first model of CryptoFaxPa](https://teamdigitale.governo.it/upload/docs/2018/cryptofax-pa-it.pdf) officially launched on April, 1st 2018, a revamped and much more powerful version is now available. It's fully open source.
 
 <img src="pics/P1410474.jpg" width="640" />
 
