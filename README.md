@@ -1,16 +1,16 @@
-# CryptoFaxPA 2.0
+# CryptoFaxPA 2.0 📠
 
 This repository contains source code for the new model of CryptoFaxPA.
 
-<img src="P1410474.jpg" width="640" />
+<img src="pics/P1410474.jpg" width="640" />
 
-<img src="P1410484.jpg" width="640" />
+<img src="pics/P1410484.jpg" width="640" />
 
-<img src="P1410472.jpg" width="640" />
+<img src="pics/P1410472.jpg" width="640" />
 
-<img src="P1410462.jpg" width="640" />
+<img src="pics/P1410462.jpg" width="640" />
 
-<img src="P1410470.jpg" width="640" />
+<img src="pics/P1410470.jpg" width="640" />
 
 ## How it works
 
