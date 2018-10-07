@@ -9,15 +9,22 @@ import (
 	"os/exec"
 	"sync"
 	"time"
+
+	"github.com/gobuffalo/packr"
 )
 
 var flagListenAddr = flag.String("listen", "127.0.0.1:8080", "address to listen to")
 
-var templ = template.Must(template.New("Templates").ParseGlob("assets/templates/*.html")).Funcs(template.FuncMap{
-	"xxxeq": func(a, b interface{}) bool {
-		return a == b
-	},
-})
+var templ *template.Template
+
+func init() {
+	box := packr.NewBox("./assets/templates")
+
+	templ = template.New("Templates")
+	templ = template.Must(templ.New("head.html").Parse(box.String("head.html")))
+	templ = template.Must(templ.New("footer.html").Parse(box.String("footer.html")))
+	templ = template.Must(templ.New("connection.html").Parse(box.String("connection.html")))
+}
 
 type BackgroundScanner struct {
 	w     sync.Mutex
@@ -163,7 +170,8 @@ func main() {
 	flag.Parse()
 	go gScanner.Run()
 
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("assets/html"))))
+	static := packr.NewBox("./assets/html")
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(static)))
 	http.HandleFunc("/connection", pageConnection)
 	http.HandleFunc("/connection/add", pageConnectionAdd)
 	http.HandleFunc("/connection/remove", pageConnectionRemove)
