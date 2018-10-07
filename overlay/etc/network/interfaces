@@ -1,0 +1,27 @@
+# interfaces(5) file used by ifup(8) and ifdown(8)
+
+# Please note that this file is written to be used with dhcpcd
+# For static IP, consult /etc/dhcpcd.conf and 'man dhcpcd.conf'
+
+# Include files from /etc/network/interfaces.d:
+source-directory /etc/network/interfaces.d
+
+auto eth0
+iface eth0 inet dhcp
+
+allow-hotplug wlan0   # start at boot
+iface wlan0 inet dhcp 
+  #pre-up ifup ap0
+  #pre-up sleep 2
+  pre-up wpa_supplicant -c /etc/wpa_supplicant/wpa_supplicant.conf -i wlan0 -B
+  post-down killall wpa_supplicant
+
+#allow-hotplug ap0
+iface ap0 inet static 
+  hostapd /etc/hostapd/hostapd.conf
+  pre-up iw phy phy0 interface add ap0 type __ap
+  address 192.168.90.1
+  netmask 255.255.255.0
+  post-down iw dev ap0 del
+  wpa-ssid "CryptoFaxPA"
+
