@@ -1,0 +1,15 @@
+[Unit]
+Description=CryptoFaxPA daemon
+#Wants=network-online.target
+#After=network-online.target
+
+[Service]
+Type=simple
+ExecStartPre=/home/pi/bumpvolume.sh
+WorkingDirectory=/home/pi/realcrypto
+ExecStart=/home/pi/realcrypto/client
+Restart=always
+Environment=CLOUDMQTT_URL=mqtt://...
+
+[Install]
+WantedBy=basic.target
