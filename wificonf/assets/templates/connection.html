@@ -22,14 +22,16 @@
                 <td>{{ .Name }}</td>
                 <td>
                     {{ if eq .Status "CONNECTED" }}
-                        <span class="label label-success">Connected</span></td>
+                        <span class="label label-success">Connected</span>
                     {{ end }}
                     {{ if eq .Status "NOINTERNET" }}
-                        <span class="label label-warning">Internet unreachable</span></td>
+                        <span class="label label-warning">Internet unreachable</span>
                     {{ end }}
                     {{ if eq .Status "DISCONNECTED" }}
-                        <span class="label label-danger">Disconnected</span></td>
+                        <span class="label label-danger">Disconnected</span>
                     {{ end }}
+
+                    {{ .Comment }}
                 </td>
                 <td>{{ .IP }}</td>
             </tr>
@@ -37,20 +39,81 @@
         </table>
 
         <div class="row">
+
             <div class="col-md-4">
-                <h1>Wi-Fi scan</h1>
-                <ul class="list-group" style="overflow:scroll">
+                <h1>Add a new Wi-Fi Network</h1>
+                <form id="addwifi" class="form-horizontal">
+                  <div class="form-group">
+                    <label for="inputName" class="col-md-4 control-label">Wi-Fi Network</label>
+                    <div class="col-md-8">
+                      <input type="text" class="form-control" id="inputName" placeholder="Name">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="inputPassword" class="col-md-4 control-label">Password</label>
+                    <div class="col-md-8">
+                      <input type="text" class="form-control" id="inputPassword" placeholder="Password">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="col-md-offset-2 col-md-2">
+                      <button type="submit" class="btn btn-default">Connect</button>
+                    </div>
+                  </div>
+                </form>
+            </div>
+
+            <div class="col-md-offset-2 col-md-6">
+                <h4>Scanning...</h4>
+                <ul id="scan" class="list-group" style="overflow:scroll">
                 {{ $current := .WifiCurrent }}
                 {{ range .WifiScan }}
-                    <li class="list-group-item {{ if eq $current . }} list-group-item-success {{ end }}">{{.}}</li>
+                    <a href="#" class="list-group-item {{ if eq $current . }} list-group-item-success {{ end }}">{{.}}</a>
                 {{ end }}
                 </ul>
             </div>
-            <div class="col-md-8">
-                <h1>Add a Wi-Fi network</h1>
-            </div>
-        </table>
 
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <h1>Forget a Wi-Fi</h1>
+
+                <form>
+                    <ul id="known" class="list-group" style="overflow:scroll">
+                    {{ $current := .WifiCurrent }}
+                    {{ range .WifiKnown }}
+                        <a href="#" class="list-group-item">
+                        {{ if eq $current . }} <span class="badge">*</span>  {{ end }}
+                        {{ . }}
+                        </a>
+                    {{ end }}
+                    </ul>
+
+                  <div class="form-group">
+                    <div class="col-md-offset-2 col-md-2">
+                      <button id="forget" type="submit" class="btn btn-default disabled">Forget</button>
+                    </div>
+                  </div>
+                </form>
+            </div>
+        </div>
     </div>
+
+    <script>
+        $(document).ready(function() {
+            $("#scan a").click(function(e) {
+                e.preventDefault();
+                $("#inputName").val($(this).text());
+            });
+
+            $("#known a").click(function(e) {
+                e.preventDefault();
+                $("#known a").removeClass("active");
+                $(this).addClass("active");
+                $("#forget").removeClass("disabled");
+            });
+        });
+    </script>
 
 {{ template "footer.html" .}}

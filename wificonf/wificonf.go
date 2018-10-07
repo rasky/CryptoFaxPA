@@ -55,11 +55,13 @@ func pageConnection(rw http.ResponseWriter, req *http.Request) {
 	go gScanner.Refresh()
 
 	curwifi, _ := WpaCurrentNetwork()
+	known, _ := WpaKnownNetworks()
 
 	data := struct {
 		Active      string
 		Interfaces  []InterfaceDesc
 		WifiScan    []string
+		WifiKnown   []string
 		WifiCurrent string
 	}{
 		"connection",
@@ -69,8 +71,11 @@ func pageConnection(rw http.ResponseWriter, req *http.Request) {
 			interfaceByName("umts", "GSM / UMTS"),
 		},
 		gScanner.Networks(),
+		known,
 		curwifi,
 	}
+
+	data.Interfaces[0].Comment = "(" + curwifi + ")"
 
 	if err := templ.ExecuteTemplate(rw, "connection.html", data); err != nil {
 		panic(err)

@@ -10,9 +10,10 @@ import (
 )
 
 type InterfaceDesc struct {
-	Name   string
-	Status string
-	IP     string
+	Name    string
+	Status  string
+	IP      string
+	Comment string
 }
 
 func interfaceByName(name string, idesc string) InterfaceDesc {
@@ -111,6 +112,33 @@ WaitLoop:
 	res, errs := w.ScanResults()
 	if len(errs) != 0 {
 		return nil, errs[0]
+	}
+
+	seen := make(map[string]bool)
+	var ssids []string
+	for _, bss := range res {
+		s := bss.SSID()
+		if !seen[s] {
+			ssids = append(ssids, s)
+			seen[s] = true
+		}
+	}
+
+	sort.Strings(ssids)
+	return ssids, nil
+}
+
+// Returns the list of known networks
+func WpaKnownNetworks() ([]string, error) {
+	w, err := wpasupplicant.Unixgram("wlan0")
+	if err != nil {
+		return nil, err
+	}
+	defer w.Close()
+
+	res, err := w.ListNetworks()
+	if err != nil {
+		return nil, err
 	}
 
 	seen := make(map[string]bool)
