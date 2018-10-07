@@ -20,8 +20,9 @@ iface wlan0 inet dhcp
 iface ap0 inet static 
   hostapd /etc/hostapd/hostapd.conf
   pre-up iw phy phy0 interface add ap0 type __ap
+  post-up systemctl start wificonf
   address 192.168.90.1
   netmask 255.255.255.0
   post-down iw dev ap0 del
+  post-down systemctl stop wificonf
   wpa-ssid "CryptoFaxPA"
-
