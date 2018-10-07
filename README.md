@@ -1,6 +1,6 @@
 # CryptoFaxPA 2.0 📠
 
-After the huge success of the [first model of CryptoFaxPa](https://teamdigitale.governo.it/upload/docs/2018/cryptofax-pa-it.pdf) officially launched on April, 1st 2018, a revamped and much more powerful version is now available. It's fully open source.
+After the huge success of the [first model of CryptoFaxPa](https://teamdigitale.governo.it/upload/docs/2018/cryptofax-pa-it.pdf) officially launched on April, 1st 2018, a revamped and much more powerful version is now available. Yes, it's fully open source.
 
 <img src="pics/P1410474.jpg" width="640" />
 
@@ -17,12 +17,12 @@ After the huge success of the [first model of CryptoFaxPa](https://teamdigitale.
 Plug it to a power socket and enjoy:
 
 * GSM connection
-* WiFi connection (in case no known networks are found, CryptoFaxPA will start in access point exposing a page where a WiFi network can be selected)
+* WiFi connection (whenever the HELP button is pressed, CryptoFaxPA will launch an access point that allows WiFi configuration)
 * a HELP button which instantly prints installation instructions
 * a BLOCKCHAIN button which prints super-nerd blockchain information such as real-time Bitcoin value and other juicy things, along with a very pretty chart
 * whenever a message is sent to the @CryptoFaxPA bot on Slack, it will be encrypted and sent to the device as a fax (actually, a cryptofax), and instantly printed
-* while printing, a nice 56k modem sound is emitted
-* images are printed as well, and the Slack bot will actually preprocess them and show them as preview to the sender asking for confirmation - we don't want to send bad-looking images
+* while printing, a glorious 56k modem sound is emitted
+* images are printed as well, and the Slack bot will actually show a preprocessed preview to the sender asking for confirmation - we don't want to send bad looking images
 * in case a fax cannot be delivered to the device or printed successfully, it will be kept in spool
 
 ## Bill of materials:
@@ -41,6 +41,8 @@ Plug it to a power socket and enjoy:
 * [backend](backend): contains the bot that reacts to Slack messages and preprocesses them before adding them to a MQTT queue
 * [client](client): contains the client that runs on the CryptoFaxPA device
 * [common](common): contains common code shared by the other components
+* [wificonf](wificonf): contains the files to be replaced on a vanilla Raspbian Stretch
+* [overlay](overlay): contains the WiFi configuration tool
 
 ## Compilation
 
