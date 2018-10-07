@@ -34,4 +34,5 @@ require (
 	golang.org/x/text v0.3.0
 	google.golang.org/appengine v1.2.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
+	pifke.org/wpasupplicant v0.0.0-20171220234234-d8b63b5cd990
 )

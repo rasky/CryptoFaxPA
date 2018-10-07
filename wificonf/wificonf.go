@@ -4,9 +4,8 @@ import (
 	"flag"
 	"html/template"
 	"log"
-	"net"
 	"net/http"
-	"strings"
+	"sync"
 	"time"
 )
 
@@ -18,70 +17,50 @@ var templ = template.Must(template.New("Templates").ParseGlob("assets/templates/
 	},
 })
 
-type InterfaceDesc struct {
-	Name   string
-	Status string
-	IP     string
+type BackgroundScanner struct {
+	w     sync.Mutex
+	m     sync.Mutex
+	ssids []string
 }
 
-func interfaceByName(name string, idesc string) InterfaceDesc {
-	desc := InterfaceDesc{Name: idesc, Status: "DISCONNECTED"}
+func (scan *BackgroundScanner) Refresh() {
+	scan.w.Lock()
+	defer scan.w.Unlock()
 
-	intf, err := net.InterfaceByName(name)
-	if err != nil || intf.Flags&net.FlagUp == 0 {
-		return desc
-	}
-	ips, err := intf.Addrs()
-	if err != nil {
-		return desc
-	}
-
-	var laddrip string
-	var ipstrings []string
-	for _, ip := range ips {
-		ipinfo, _, _ := net.ParseCIDR(ip.String())
-		if ipinfo.IsGlobalUnicast() {
-			laddrip = ipinfo.String()
-			ipstrings = append(ipstrings, laddrip)
-		}
-	}
-	if len(ipstrings) == 0 {
-		return desc
-	}
-
-	desc.IP = strings.Join(ipstrings, ", ")
-
-	laddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort(laddrip, "0"))
-	if err != nil {
-		panic(err)
-	}
-
-	var raddrdest string
-	if strings.ContainsAny(laddrip, ":") {
-		raddrdest = "[2606:4700:4700::1111]:80"
-	} else {
-		raddrdest = "1.1.1.1:80"
-	}
-
-	d := net.Dialer{
-		Timeout:   time.Duration(2 * time.Second),
-		LocalAddr: laddr,
-	}
-	if conn, err := d.Dial("tcp", raddrdest); err != nil {
-		desc.Status = "NOINTERNET"
-		return desc
-	} else {
-		conn.Close()
-		desc.Status = "CONNECTED"
-		return desc
+	ssids, err := WpaScan()
+	if err == nil {
+		scan.m.Lock()
+		scan.ssids = ssids
+		scan.m.Unlock()
 	}
 }
+
+func (scan *BackgroundScanner) Run() {
+	for {
+		scan.Refresh()
+		time.Sleep(5 * time.Minute)
+	}
+}
+
+func (scan *BackgroundScanner) Networks() []string {
+	scan.m.Lock()
+	defer scan.m.Unlock()
+	return scan.ssids
+}
+
+var gScanner BackgroundScanner
 
 func pageConnection(rw http.ResponseWriter, req *http.Request) {
+	// Trigger a wifi refresh every time the page is opened
+	go gScanner.Refresh()
+
+	curwifi, _ := WpaCurrentNetwork()
 
 	data := struct {
-		Active     string
-		Interfaces []InterfaceDesc
+		Active      string
+		Interfaces  []InterfaceDesc
+		WifiScan    []string
+		WifiCurrent string
 	}{
 		"connection",
 		[]InterfaceDesc{
@@ -89,6 +68,8 @@ func pageConnection(rw http.ResponseWriter, req *http.Request) {
 			interfaceByName("eth0", "Ethernet"),
 			interfaceByName("umts", "GSM / UMTS"),
 		},
+		gScanner.Networks(),
+		curwifi,
 	}
 
 	if err := templ.ExecuteTemplate(rw, "connection.html", data); err != nil {
@@ -98,6 +79,7 @@ func pageConnection(rw http.ResponseWriter, req *http.Request) {
 
 func main() {
 	flag.Parse()
+	go gScanner.Run()
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("assets/html"))))
 	http.HandleFunc("/connection", pageConnection)
