@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"os/exec"
 	"sync"
 	"time"
 )
@@ -50,6 +52,27 @@ func (scan *BackgroundScanner) Networks() []string {
 
 var gScanner BackgroundScanner
 
+type Messages struct {
+	m   sync.Mutex
+	msg []string
+}
+
+func (msg *Messages) Add(m string) {
+	msg.m.Lock()
+	msg.msg = append(msg.msg, m)
+	msg.m.Unlock()
+}
+
+func (msg *Messages) Get() []string {
+	msg.m.Lock()
+	m := msg.msg
+	msg.msg = nil
+	msg.m.Unlock()
+	return m
+}
+
+var gMessages Messages
+
 func pageConnection(rw http.ResponseWriter, req *http.Request) {
 	// Trigger a wifi refresh every time the page is opened
 	go gScanner.Refresh()
@@ -59,12 +82,14 @@ func pageConnection(rw http.ResponseWriter, req *http.Request) {
 
 	data := struct {
 		Active      string
+		Messages    []string
 		Interfaces  []InterfaceDesc
 		WifiScan    []string
 		WifiKnown   []string
 		WifiCurrent string
 	}{
 		"connection",
+		gMessages.Get(),
 		[]InterfaceDesc{
 			interfaceByName("wlan0", "Wi-Fi"),
 			interfaceByName("eth0", "Ethernet"),
@@ -75,11 +100,63 @@ func pageConnection(rw http.ResponseWriter, req *http.Request) {
 		curwifi,
 	}
 
-	data.Interfaces[0].Comment = "(" + curwifi + ")"
+	if curwifi != "" {
+		data.Interfaces[0].Comment = "(" + curwifi + ")"
+	}
 
 	if err := templ.ExecuteTemplate(rw, "connection.html", data); err != nil {
 		panic(err)
 	}
+}
+
+func pageConnectionAdd(rw http.ResponseWriter, req *http.Request) {
+	if req.Method != "POST" {
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	name, pass := req.FormValue("name"), req.FormValue("password")
+	if err := WpaAddNetwork(name, pass); err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(fmt.Sprint(err)))
+		return
+	}
+
+	gMessages.Add(fmt.Sprintf("The Wi-Fi network %q was successfully added. If it's the strongest, CryptoFaxPA will connect soon.", name))
+	http.Redirect(rw, req, "/connection", http.StatusSeeOther)
+
+	// Reset the network interface
+	go func() {
+		time.Sleep(2 * time.Second)
+		exec.Command("sudo", "ifdown", "wlan0").Run()
+		time.Sleep(2 * time.Second)
+		exec.Command("sudo", "ifup", "wlan0").Run()
+	}()
+}
+
+func pageConnectionRemove(rw http.ResponseWriter, req *http.Request) {
+	if req.Method != "POST" {
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	name := req.FormValue("name")
+	if err := WpaRemoveNetwork(name); err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(fmt.Sprint(err)))
+		return
+	}
+
+	gMessages.Add(fmt.Sprintf("The Wi-Fi network %q was successfully removed.", name))
+	http.Redirect(rw, req, "/connection", http.StatusSeeOther)
+
+	// Reset the network interface
+	go func() {
+		time.Sleep(2 * time.Second)
+		exec.Command("sudo", "ifdown", "wlan0").Run()
+		time.Sleep(2 * time.Second)
+		exec.Command("sudo", "ifup", "wlan0").Run()
+	}()
 }
 
 func main() {
@@ -88,6 +165,8 @@ func main() {
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("assets/html"))))
 	http.HandleFunc("/connection", pageConnection)
+	http.HandleFunc("/connection/add", pageConnectionAdd)
+	http.HandleFunc("/connection/remove", pageConnectionRemove)
 
 	log.Printf("Listening on %v", *flagListenAddr)
 	http.ListenAndServe(*flagListenAddr, nil)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net"
 	"sort"
 	"strings"
@@ -153,4 +154,59 @@ func WpaKnownNetworks() ([]string, error) {
 
 	sort.Strings(ssids)
 	return ssids, nil
+}
+
+func WpaAddNetwork(name, pass string) error {
+	w, err := wpasupplicant.Unixgram("wlan0")
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	idx, err := w.AddNetwork()
+	if err != nil {
+		return err
+	}
+
+	if err := w.SetNetwork(idx, "ssid", name); err != nil {
+		return err
+	}
+	if pass != "" {
+		if err := w.SetNetwork(idx, "psk", pass); err != nil {
+			return err
+		}
+	} else {
+		if err := w.SetNetwork(idx, "key_mgmt", "NONE"); err != nil {
+			return err
+		}
+	}
+	if err := w.EnableNetwork(idx); err != nil {
+		return err
+	}
+
+	return w.SaveConfig()
+}
+
+func WpaRemoveNetwork(name string) error {
+	w, err := wpasupplicant.Unixgram("wlan0")
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	res, err := w.ListNetworks()
+	if err != nil {
+		return err
+	}
+
+	for idx, bss := range res {
+		if bss.SSID() == name {
+			if err := w.RemoveNetwork(idx); err != nil {
+				return err
+			}
+			return w.SaveConfig()
+		}
+	}
+
+	return errors.New("the specified network was not found in the configuration")
 }
