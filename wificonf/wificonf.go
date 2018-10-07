@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/packr"
+	"github.com/rasky/CryptoFaxPA/common"
 )
 
 var flagListenAddr = flag.String("listen", "127.0.0.1:8080", "address to listen to")
@@ -24,6 +25,9 @@ func init() {
 	templ = template.Must(templ.New("head.html").Parse(box.String("head.html")))
 	templ = template.Must(templ.New("footer.html").Parse(box.String("footer.html")))
 	templ = template.Must(templ.New("connection.html").Parse(box.String("connection.html")))
+	templ = template.Must(templ.New("logo.html").Parse(box.String("logo.html")))
+	templ = template.Must(templ.New("home.html").Parse(box.String("home.html")))
+	templ = template.Must(templ.New("blockchain.html").Parse(box.String("blockchain.html")))
 }
 
 type BackgroundScanner struct {
@@ -79,6 +83,34 @@ func (msg *Messages) Get() []string {
 }
 
 var gMessages Messages
+
+func pageHome(rw http.ResponseWriter, req *http.Request) {
+	data := struct {
+		Active string
+	}{
+		"home",
+	}
+
+	if err := templ.ExecuteTemplate(rw, "home.html", data); err != nil {
+		panic(err)
+	}
+}
+
+func pageBlockchain(rw http.ResponseWriter, req *http.Request) {
+	data := struct {
+		Active    string
+		NerdInfos []common.BlockchainNerdInfo
+		Graph     string
+	}{
+		"blockchain",
+		common.GetBlockchainNerdInfos(),
+		common.GetBitcoinAsciiGraph(100, 30),
+	}
+
+	if err := templ.ExecuteTemplate(rw, "blockchain.html", data); err != nil {
+		panic(err)
+	}
+}
 
 func pageConnection(rw http.ResponseWriter, req *http.Request) {
 	// Trigger a wifi refresh every time the page is opened
@@ -172,9 +204,11 @@ func main() {
 
 	static := packr.NewBox("./assets/html")
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(static)))
+	http.HandleFunc("/", pageHome)
 	http.HandleFunc("/connection", pageConnection)
 	http.HandleFunc("/connection/add", pageConnectionAdd)
 	http.HandleFunc("/connection/remove", pageConnectionRemove)
+	http.HandleFunc("/blockchain", pageBlockchain)
 
 	log.Printf("Listening on %v", *flagListenAddr)
 	http.ListenAndServe(*flagListenAddr, nil)
