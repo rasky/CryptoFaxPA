@@ -1,0 +1,57 @@
+{{ template "head.html" .}}
+
+    <div class="container" role="main">
+        <div class="row"></div>
+
+        <div class="page-header">
+            <div class="jumbotron">
+                <h1>Network configuration</h1>
+                <p>This pages allows to monitor and change the network configuration</p>
+            </div>
+        </div>
+
+        <h1>Connection status</h1>
+        <table class="table table-bordered">
+            <tr>
+                <th>Interface</th>
+                <th>Status</th>
+                <th>IP addresses</th>
+            </tr>
+            {{ range .Interfaces }}
+            <tr>
+                <td>{{ .Name }}</td>
+                <td>
+                    {{ if eq .Status "CONNECTED" }}
+                        <span class="label label-success">Connected</span></td>
+                    {{ end }}
+                    {{ if eq .Status "NOINTERNET" }}
+                        <span class="label label-warning">Internet unreachable</span></td>
+                    {{ end }}
+                    {{ if eq .Status "DISCONNECTED" }}
+                        <span class="label label-danger">Disconnected</span></td>
+                    {{ end }}
+                </td>
+                <td>{{ .IP }}</td>
+            </tr>
+            {{ end }}
+        </table>
+
+        <div class="row">
+            <div class="col-md-4">
+                <h1>Known Wi-Fi networks</h1>
+                <ul class="list-group">
+                    <li class="list-group-item">Cras justo odio</li>
+                    <li class="list-group-item list-group-item-success">Dapibus ac facilisis in</li>
+                    <li class="list-group-item">Morbi leo risus</li>
+                    <li class="list-group-item">Porta ac consectetur ac</li>
+                    <li class="list-group-item">Vestibulum at eros</li>
+                </ul>
+            </div>
+            <div class="col-md-8">
+                <h1>Add a Wi-Fi network</h1>
+            </div>
+        </table>
+
+    </div>
+
+{{ template "footer.html" .}}

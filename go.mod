@@ -10,6 +10,7 @@ require (
 	github.com/esimov/dithergo v0.0.0-20170530095937-48e039c66812
 	github.com/go-redis/cache v6.3.5+incompatible
 	github.com/go-redis/redis v6.14.1+incompatible
+	github.com/godbus/dbus v4.1.0+incompatible
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
@@ -20,7 +21,10 @@ require (
 	github.com/nlopes/slack v0.3.1-0.20180921205747-752f784a75e8
 	github.com/onsi/gomega v1.4.2 // indirect
 	github.com/pkg/errors v0.8.0 // indirect
+	github.com/plorefice/gonnman v0.0.0-20160122094418-b1901d019bb2
+	github.com/plorefice/web v0.0.0-20151028134842-063fa58e12cc
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rakyll/statik v0.1.5 // indirect
 	github.com/stianeikeland/go-rpio v3.0.1-0.20180606224349-3abdd2207d33+incompatible
 	github.com/stretchr/testify v1.2.2 // indirect
 	github.com/vmihailenco/msgpack v4.0.0+incompatible
