@@ -197,6 +197,16 @@ func print_fax(fax common.Fax) {
 }
 
 func print_help() {
+    // get our IP address in access point mode
+    // (unfortunately cryptofaxpa.local does not work from Android)
+	out, err := exec.Command("/bin/bash", "-c", `/sbin/ifconfig | /usr/bin/awk -v RS="\n\n" '{ for (i=1; i<=NF; i++) if ($i == "inet") address = $(i+1); if ($1 == "ap0:") printf "%s", address }'`).Output()
+    var hostname string
+    if err == nil && len(out) > 0 {
+        hostname = string(out)
+    } else {
+        hostname = "cryptofaxpa.local"
+    }
+    
 	common.StartBlinking()
 	defer common.StopBlinking()
 
@@ -219,10 +229,10 @@ In particolare CryptoFaxPA consente all'utente (d'ora in avanti denominato per s
 	buf.WriteString("\x1b!\x80") // font A, underlined
 	buf.WriteString("Configurazione WiFi\n")
 	buf.WriteString("\x1b!\x00") // font A, single-height
-	buf.Write(common.EncodeForPrinter(`Se CryptoFaxPA non rileva una rete WiFi nota, trascorsi 120 secondi si avvia in modalità access point esponendo una rete wireless di nome CryptoFaxPA. A quel punto basterà accedervi con un qualsiasi altro device ed aprire la pagina http://cryptofaxpa.local, dove sarà possibile configurare la propria rete WiFi.`))
+	buf.Write(common.EncodeForPrinter(fmt.Sprintf(`Se CryptoFaxPA non rileva una rete WiFi nota, trascorsi 120 secondi si avvia in modalità access point esponendo una rete wireless di nome CryptoFaxPA. A quel punto basterà accedervi con un qualsiasi altro device ed aprire la pagina http://%s, dove sarà possibile configurare la propria rete WiFi.`, hostname)))
 
 	// print network addresses
-	out, err := exec.Command("/bin/bash", "-c", `/sbin/ifconfig | /usr/bin/awk -v RS="\n\n" '{ for (i=1; i<=NF; i++) if ($i == "inet") address = $(i+1); if (address != "127.0.0.1") printf "%s\t%s\n", $1, address }'`).Output()
+	out, err = exec.Command("/bin/bash", "-c", `/sbin/ifconfig | /usr/bin/awk -v RS="\n\n" '{ for (i=1; i<=NF; i++) if ($i == "inet") address = $(i+1); if (address != "127.0.0.1") printf "%s\t%s\n", $1, address }'`).Output()
 	if err == nil {
 		buf.WriteString("\n\n")
 		buf.Write(out)
