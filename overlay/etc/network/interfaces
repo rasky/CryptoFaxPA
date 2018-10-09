@@ -6,18 +6,28 @@
 # Include files from /etc/network/interfaces.d:
 source-directory /etc/network/interfaces.d
 
+# Cable Ethernet
 auto eth0
 iface eth0 inet dhcp
+  metric 10
 
+# UMTS modem
+allow-hotplug eth1
+iface eth1 inet dhcp
+  metric 200
+
+# WiFi
 allow-hotplug wlan0   # start at boot
-iface wlan0 inet dhcp 
+iface wlan0 inet dhcp
   #pre-up ifup ap0
   #pre-up sleep 2
   pre-up wpa_supplicant -c /etc/wpa_supplicant/wpa_supplicant.conf -i wlan0 -B
   post-down killall wpa_supplicant
+  metric 50
 
+# Access point
 #allow-hotplug ap0
-iface ap0 inet static 
+iface ap0 inet static
   hostapd /etc/hostapd/hostapd.conf
   pre-up iw phy phy0 interface add ap0 type __ap
   post-up systemctl start wificonf
