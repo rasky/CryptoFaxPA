@@ -85,6 +85,11 @@ func (msg *Messages) Get() []string {
 var gMessages Messages
 
 func pageHome(rw http.ResponseWriter, req *http.Request) {
+    if req.URL.Path != "/" {
+        http.Redirect(rw, req, "/", http.StatusSeeOther)
+        return
+    }
+    
 	data := struct {
 		Active string
 	}{
