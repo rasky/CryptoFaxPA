@@ -1,7 +1,7 @@
 #!/bin/bash
-set -euo pipefail
+set -euxo pipefail
 
 env GOOS=linux GOARCH=arm GOARM=7 packr build
-ssh pi@cryptofax.local killall wificonf || true
-scp wificonf pi@cryptofax.local:
-ssh pi@cryptofax.local ./wificonf -listen 0.0.0.0:8080
+ssh pi@cryptofaxpa.local killall wificonf || true
+scp wificonf pi@cryptofaxpa.local:
+ssh pi@cryptofaxpa.local ./wificonf -listen 0.0.0.0:8080
