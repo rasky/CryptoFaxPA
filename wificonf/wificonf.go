@@ -132,7 +132,7 @@ func pageConnection(rw http.ResponseWriter, req *http.Request) {
 		[]InterfaceDesc{
 			interfaceByName("wlan0", "Wi-Fi"),
 			interfaceByName("eth0", "Ethernet"),
-			interfaceByName("umts", "GSM / UMTS"),
+			interfaceByName("eth1", "GSM / UMTS"),
 		},
 		gScanner.Networks(),
 		known,
