@@ -53,13 +53,20 @@
                   <div class="form-group">
                     <label for="inputName" class="col-md-4 control-label">Wi-Fi Network</label>
                     <div class="col-md-8">
-                      <input type="text" class="form-control" name="name" id="inputName" placeholder="Name">
+                      <!--<input type="text" class="form-control" name="name" id="inputName" placeholder="Name">-->
+                      <select name="name" class="form-control" id="inputName">
+                        {{ $current := .WifiCurrent }}
+                        {{ range .WifiScan }}
+                            <option {{ if eq $current . }} selected {{ end }}>{{.}}</option>
+                        {{ end }}
+                        <option disabled>Reload page to re-scan</option>
+                      </select>
                     </div>
                   </div>
                   <div class="form-group">
                     <label for="inputPassword" class="col-md-4 control-label">Password</label>
                     <div class="col-md-8">
-                      <input type="text" class="form-control" name="password", id="inputPassword" placeholder="Password">
+                      <input type="text" class="form-control" name="password" id="inputPassword" placeholder="">
                     </div>
                   </div>
                   <div class="form-group">
@@ -71,19 +78,6 @@
             </div>
 
             <div class="col-md-offset-2 col-md-6">
-                <h4>Wi-Fi Scan (reload to refresh)</h4>
-                <ul id="scan" class="list-group" style="overflow:scroll">
-                {{ $current := .WifiCurrent }}
-                {{ range .WifiScan }}
-                    <a href="#" class="list-group-item {{ if eq $current . }} list-group-item-success {{ end }}">{{.}}</a>
-                {{ end }}
-                </ul>
-            </div>
-
-        </div>
-
-        <div class="row">
-            <div class="col-md-4">
                 <h1>Forget a Wi-Fi</h1>
 
                 <form method="POST" action="/connection/remove">
@@ -105,16 +99,12 @@
                   </div>
                 </form>
             </div>
+
         </div>
     </div>
 
     <script>
         $(document).ready(function() {
-            $("#scan a").click(function(e) {
-                e.preventDefault();
-                $("#inputName").val($(this).text());
-            });
-
             $("#known a").click(function(e) {
                 e.preventDefault();
                 $("#known a").removeClass("active");
