@@ -200,16 +200,16 @@ func print_fax(fax common.Fax) {
 }
 
 func print_help() {
-    // get our IP address in access point mode
-    // (unfortunately cryptofaxpa.local does not work from Android)
+	// get our IP address in access point mode
+	// (unfortunately cryptofaxpa.local does not work from Android)
 	out, err := exec.Command("/bin/bash", "-c", `/sbin/ifconfig | /usr/bin/awk -v RS="\n\n" '{ for (i=1; i<=NF; i++) if ($i == "inet") address = $(i+1); if ($1 == "ap0:") printf "%s", address }'`).Output()
-    var hostname string
-    if err == nil && len(out) > 0 {
-        hostname = string(out)
-    } else {
-        hostname = "cryptofaxpa.local"
-    }
-    
+	var hostname string
+	if err == nil && len(out) > 0 {
+		hostname = string(out)
+	} else {
+		hostname = "cryptofaxpa.local"
+	}
+
 	common.StartBlinking()
 	defer common.StopBlinking()
 
