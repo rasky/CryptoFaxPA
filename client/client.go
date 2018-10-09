@@ -127,6 +127,9 @@ func print_fax_from_spool() {
 		log.Printf("[ERROR] cannot access spool dir: %v", err)
 		return
 	}
+	if len(files) == 0 {
+		return
+	}
 
 	// From this point on, remove the file after we finished processing it.
 	// If the process crashes (eg: system shutdown), the file will still be there
