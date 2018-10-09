@@ -112,7 +112,7 @@ func PollMqtt(chfax chan bool, surl string) {
 
 	c.Subscribe(common.FaxMqttTopic, ClientMqttQos, func(client mqtt.Client, msg mqtt.Message) {
 		// Use a filename whose alphabetical sorting respects the order of arrival
-		filename := fmt.Sprintf("%s/%016x", *flagSpoolDir, time.Now().Unix())
+		filename := fmt.Sprintf("%s/%016x", *flagSpoolDir, time.Now().UnixNano())
 		common.WriteFileSync(filename, msg.Payload(), 0777)
 		chfax <- true
 	})
@@ -128,6 +128,7 @@ func print_fax_from_spool() {
 		return
 	}
 	if len(files) == 0 {
+		log.Printf("[ERROR] internal error: print_fax_from_spool() called with empty spool")
 		return
 	}
 
