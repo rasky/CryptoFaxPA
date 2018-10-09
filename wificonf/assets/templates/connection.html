@@ -1,8 +1,6 @@
 {{ template "head.html" .}}
 
     <div class="container" role="main">
-        <div class="row">&nbsp;</div>
-
         {{ range .Messages }}
         <div class="alert alert-success alert-dismissible" role="alert">
           <p><strong>Well done!</strong> {{ . }} <p/>

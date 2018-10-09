@@ -1,3 +1,13 @@
 a.list-group-item:hover, a.list-group-item:focus {
     color: white;
 }
+
+body { padding-top: 10px; }
+
+.navbar-toggle {
+	padding: 2px 2px 2px 2px;
+}
+
+.navbar-toggle .icon-bar {
+	margin-bottom: 2px;
+}
