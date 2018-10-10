@@ -39,6 +39,12 @@ func main() {
 	if fi, err := os.Stat(*flagSpoolDir); err != nil || !fi.IsDir() {
 		log.Fatalf("%s does not exist or is not a directory", *flagSpoolDir)
 	}
+	
+	// Check that printer is connected
+	for !common.PrinterIsConnected() {
+	    log.Printf("Waiting for printer, retrying in 2 seconds...\n")
+	    time.Sleep(2 * time.Second)
+	}
 
 	// Start background bootstrap sound
 	go exec.Command("play", "startup.ogg").Run()
@@ -99,6 +105,7 @@ func PollMqtt(chfax chan bool, surl string) {
 		if err != nil {
 			log.Printf("[INFO] cannot connect to MQTT server: %v", err)
 			log.Printf("[INFO] retrying in %v...", sleep)
+			common.PrintString(fmt.Sprintf("MQTT connection failed, retrying in %v...\n\n", sleep), false);
 			time.Sleep(sleep)
 			sleep = sleep + sleep/3
 			if sleep > 5*time.Minute {
@@ -118,6 +125,7 @@ func PollMqtt(chfax chan bool, surl string) {
 	})
 
 	log.Printf("[INFO] connected to MQTT server, start polling")
+	common.PrintString("connected to MQTT server, start polling\n\n", false);
 	select {}
 }
 

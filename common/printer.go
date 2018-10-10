@@ -12,6 +12,13 @@ import (
 	"golang.org/x/text/encoding/charmap"
 )
 
+const printer_path = "/dev/usb/lp0"
+
+func PrinterIsConnected() bool {
+    _, err := os.Stat(printer_path)
+    return !os.IsNotExist(err)
+}
+
 // Convert a Unicode string into the encoding understood by the printer.
 // TODO: we could handle Markdown here as well
 func EncodeForPrinter(s string) (out []byte) {
@@ -35,7 +42,7 @@ func min(x, y int) int {
 
 // Print raw (cp437-encoded) bytes to the printer
 func PrintBytes(buf []byte, feed_past_cutter bool) {
-	f, err := os.Create("/dev/usb/lp0")
+	f, err := os.Create(printer_path)
 	if err != nil {
 		fmt.Println(err)
 		return
