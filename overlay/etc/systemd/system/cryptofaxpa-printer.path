@@ -1,0 +1,6 @@
+[Unit]
+Description=CryptoFaxPA Thermal Printer
+[Path]
+PathExists=/dev/usb/lp0
+[Install]
+WantedBy=multi-user.target

@@ -1,7 +1,7 @@
 [Unit]
 Description=CryptoFaxPA daemon
-#Wants=network-online.target
-#After=network-online.target
+Wants=network-online.target
+After=network-online.target cryptofaxpa-printer.path
 
 [Service]
 Type=simple
