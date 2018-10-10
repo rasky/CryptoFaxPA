@@ -1,0 +1,8 @@
+[Unit]
+Description = Wi-Fi Configuration daemon
+
+[Service]
+Type = simple
+Restart = always
+ExecStart = /home/pi/realcrypto/wificonf -listen 192.168.90.1:80
+

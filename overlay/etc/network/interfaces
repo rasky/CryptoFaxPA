@@ -34,5 +34,5 @@ iface ap0 inet static
   address 192.168.90.1
   netmask 255.255.255.0
   post-down iw dev ap0 del
-  post-down systemctl stop wificonf
+  pre-down systemctl stop wificonf
   wpa-ssid "CryptoFaxPA"
