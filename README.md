@@ -41,8 +41,8 @@ Plug it to a power socket and enjoy:
 * [backend](backend): contains the bot that reacts to Slack messages and preprocesses them before adding them to a MQTT queue
 * [client](client): contains the client that runs on the CryptoFaxPA device
 * [common](common): contains common code shared by the other components
-* [wificonf](wificonf): contains the files to be replaced on a vanilla Raspbian Stretch
-* [overlay](overlay): contains the WiFi configuration tool
+* [wificonf](wificonf): contains the WiFi configuration tool
+* [overlay](overlay): contains the files to be replaced on a vanilla Raspbian Stretch
 
 ## Compilation
 
