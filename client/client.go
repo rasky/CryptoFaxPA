@@ -266,7 +266,7 @@ func print_blockchain() {
 	fmt.Fprintln(&buf, "Updated at:", common.NowHere().Format("2006-01-02 15:04:05 (MST)"))
 
 	for _, info := range common.GetBlockchainNerdInfos() {
-		fmt.Fprintln(&buf, "%s:\n %s", info.Name, info.Value)
+		fmt.Fprintf(&buf, "%s:\n %s\n", info.Name, info.Value)
 	}
 	common.PrintBytes(buf.Bytes(), true)
 
