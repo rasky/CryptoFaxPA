@@ -2,3 +2,5 @@
 button-helper/button-helper
 client/client
 wificonf/wificonf
+overlay/home/pi/client
+overlay/home/pi/wificonf

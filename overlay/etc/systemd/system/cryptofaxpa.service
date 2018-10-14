@@ -9,7 +9,7 @@ ExecStartPre=/home/pi/bumpvolume.sh
 WorkingDirectory=/home/pi/realcrypto
 ExecStart=/home/pi/realcrypto/client
 Restart=always
-Environment=CLOUDMQTT_URL=mqtt://...
+EnvironmentFile=/etc/sysconfig/cryptofaxpa
 
 [Install]
 WantedBy=basic.target
