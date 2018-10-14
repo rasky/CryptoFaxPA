@@ -68,18 +68,11 @@ func InterfaceInspect(iif Interface) InterfaceDesc {
 		panic(err)
 	}
 
-	var raddrdest string
-	if strings.ContainsAny(laddrip, ":") {
-		raddrdest = "[2606:4700:4700::1111]:80"
-	} else {
-		raddrdest = "1.1.1.1:80"
-	}
-
 	d := net.Dialer{
 		Timeout:   time.Duration(2 * time.Second),
 		LocalAddr: laddr,
 	}
-	if conn, err := d.Dial("tcp", raddrdest); err != nil {
+	if conn, err := d.Dial("tcp", "www.google.com:80"); err != nil {
 		desc.Status = "NOINTERNET"
 		return desc
 	} else {
