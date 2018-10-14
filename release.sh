@@ -38,7 +38,7 @@ case $(uname -s) in
     *)          TAR=tar
 esac
 $TAR --mode=a+rw --mtime="$VDATE" --owner=0 --group=0 \
-	-C overlay -cz . | gpg --quiet --sign > "$TMP_SWFAX"
+	-C overlay --exclude=.KEEPME -cz . | gpg --quiet --sign > "$TMP_SWFAX"
 
 # Verify the release is made with a trusted version
 if ! gpg --no-default-keyring --no-auto-key-retrieve --keyring "$KEYRING" --verify "$TMP_SWFAX"; then
