@@ -39,11 +39,11 @@ func main() {
 	if fi, err := os.Stat(*flagSpoolDir); err != nil || !fi.IsDir() {
 		log.Fatalf("%s does not exist or is not a directory", *flagSpoolDir)
 	}
-	
+
 	// Check that printer is connected
 	for !common.PrinterIsConnected() {
-	    log.Printf("Waiting for printer, retrying in 2 seconds...\n")
-	    time.Sleep(2 * time.Second)
+		log.Printf("Waiting for printer, retrying in 2 seconds...\n")
+		time.Sleep(2 * time.Second)
 	}
 
 	// Start background bootstrap sound
@@ -105,7 +105,7 @@ func PollMqtt(chfax chan bool, surl string) {
 		if err != nil {
 			log.Printf("[INFO] cannot connect to MQTT server: %v", err)
 			log.Printf("[INFO] retrying in %v...", sleep)
-			common.PrintString(fmt.Sprintf("MQTT connection failed, retrying in %v...\n\n", sleep), false);
+			// common.PrintString(fmt.Sprintf("MQTT connection failed, retrying in %v...\n\n", sleep), false)
 			time.Sleep(sleep)
 			sleep = sleep + sleep/3
 			if sleep > 5*time.Minute {
@@ -125,7 +125,7 @@ func PollMqtt(chfax chan bool, surl string) {
 	})
 
 	log.Printf("[INFO] connected to MQTT server, start polling")
-	common.PrintString("connected to MQTT server, start polling\n\n", false);
+	// common.PrintString("connected to MQTT server, start polling\n\n", false)
 	select {}
 }
 
@@ -208,6 +208,8 @@ func print_fax(fax common.Fax) {
 	}
 }
 
+var stopAccessPoint *time.Timer
+
 func print_help() {
 	// get our IP address in access point mode
 	// (unfortunately cryptofaxpa.local does not work from Android)
@@ -239,9 +241,13 @@ In particolare CryptoFaxPA consente all'utente (d'ora in avanti denominato per s
 	buf.WriteString("\n\n")
 
 	buf.WriteString("\x1b!\x80") // font A, underlined
-	buf.WriteString("Configurazione WiFi\n")
+	buf.WriteString("Configurazione\n")
 	buf.WriteString("\x1b!\x00") // font A, single-height
-	buf.Write(common.EncodeForPrinter(fmt.Sprintf(`Se CryptoFaxPA non rileva una rete WiFi nota, trascorsi 120 secondi si avvia in modalità access point esponendo una rete wireless di nome CryptoFaxPA. A quel punto basterà accedervi con un qualsiasi altro device ed aprire la pagina http://%s, dove sarà possibile configurare la propria rete WiFi.`, hostname)))
+	buf.Write(common.EncodeForPrinter(fmt.Sprintf(`Da questo momento, puoi configurare `+
+		`il dispositivo collegandoti alla speciale rete Wi-Fi chiamata CryptoFaxPA che `+
+		`è stata appena creata, e rimarrà accesa per 15 minuti. Se la pagina di configurazione `+
+		`non si apre automaticamente, vai su http://%s. Lì potrai inserire la password di `+
+		`nuove rete Wi-Fi, o forzare un aggiornamento del software.`, hostname)))
 
 	// print network addresses
 	out, err = exec.Command("/bin/bash", "-c", `/sbin/ifconfig | /usr/bin/awk -v RS="\n\n" '{ for (i=1; i<=NF; i++) if ($i == "inet") address = $(i+1); if (address != "127.0.0.1") printf "%s\t%s\n", $1, address }'`).Output()
@@ -252,6 +258,15 @@ In particolare CryptoFaxPA consente all'utente (d'ora in avanti denominato per s
 	}
 
 	common.PrintBytes(buf.Bytes(), true)
+
+	// Run the AP for 15 minutes
+	if stopAccessPoint != nil {
+		stopAccessPoint.Stop()
+	}
+	go exec.Command("sudo", "/usr/local/sbin/ap_on.sh").Run()
+	stopAccessPoint = time.AfterFunc(15*time.Minute, func() {
+		exec.Command("sudo", "/usr/local/sbin/ap_off.sh").Run()
+	})
 }
 
 func print_blockchain() {
