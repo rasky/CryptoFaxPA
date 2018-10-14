@@ -45,10 +45,11 @@
         		var output = document.createElement("pre");
         		document.querySelector("#output").appendChild(output);
         		evtSource.onmessage = function(e) {
-					var line = e.data;
-					console.log(line);
-  					output.innerHTML += line + "\n";
-  				}
+  					output.innerHTML += e.data + "\n";
+  				};
+  				evtSource.onerror = function(e) {
+  					evtSource.close();
+  				};
         	})
         });
     </script>
