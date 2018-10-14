@@ -6,8 +6,8 @@ After=network-online.target cryptofaxpa-printer.path
 [Service]
 Type=simple
 ExecStartPre=/home/pi/bumpvolume.sh
-WorkingDirectory=/home/pi/realcrypto
-ExecStart=/home/pi/realcrypto/client
+WorkingDirectory=/home/pi
+ExecStart=/home/pi/client
 Restart=always
 EnvironmentFile=/etc/sysconfig/cryptofaxpa
 
