@@ -1,0 +1,56 @@
+{{ template "head.html" .}}
+
+    <div class="container" role="main">
+        <div class="page-header">
+            <div class="jumbotron">
+                <h1>Software update</h1>
+                <p>Check the latest version and update if necessary.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+		        <table class="table table-striped">
+	        		<tr>
+		                <td>Current version</td>
+		                <td>{{ .Version }}</td>
+		            </tr>
+	        		<tr>
+		                <td>&nbsp;</td>
+		                <td>&nbsp;</td>
+		            </tr>
+				</table>
+		    </div>
+    	</div>
+
+        <div class="row">
+            <div class="col-md-8">
+	        	<button id="updatenow" type="button" class="btn btn-lg btn-default">Update now</button>
+	        </div>
+    	</div>
+
+        <div class="row">
+            <div id="output" class="col-md-12">
+        	</div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+        	$("#updatenow").click(function(e) {
+        		e.preventDefault();
+        		$("#updatenow").addClass("disabled");
+
+        		var evtSource = new EventSource("/version/update");
+        		var output = document.createElement("pre");
+        		document.querySelector("#output").appendChild(output);
+        		evtSource.onmessage = function(e) {
+					var line = e.data;
+					console.log(line);
+  					output.innerHTML += line + "\n";
+  				}
+        	})
+        });
+    </script>
+
+{{ template "footer.html" .}}

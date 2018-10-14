@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"html/template"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os/exec"
@@ -28,6 +31,7 @@ func init() {
 	templ = template.Must(templ.New("logo.html").Parse(box.String("logo.html")))
 	templ = template.Must(templ.New("home.html").Parse(box.String("home.html")))
 	templ = template.Must(templ.New("blockchain.html").Parse(box.String("blockchain.html")))
+	templ = template.Must(templ.New("version.html").Parse(box.String("version.html")))
 }
 
 type BackgroundScanner struct {
@@ -203,6 +207,66 @@ func pageConnectionRemove(rw http.ResponseWriter, req *http.Request) {
 	}()
 }
 
+func pageVersion(rw http.ResponseWriter, req *http.Request) {
+	var version []byte
+
+	version, _ = ioutil.ReadFile("/var/cache/firmware.last_updated")
+
+	data := struct {
+		Active  string
+		Version string
+	}{
+		"connection",
+		string(version),
+	}
+
+	if err := templ.ExecuteTemplate(rw, "version.html", data); err != nil {
+		panic(err)
+	}
+}
+
+func pageVersionUpdate(rw http.ResponseWriter, req *http.Request) {
+	flusher, ok := rw.(http.Flusher)
+	if !ok {
+		http.Error(rw, "Streaming unsupported!", http.StatusInternalServerError)
+		return
+	}
+
+	cmd := exec.Command("sudo", "/usr/local/sbin/swupdate.sh")
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		http.Error(rw, fmt.Sprint(err), http.StatusInternalServerError)
+		return
+	}
+	cmd.Stderr = cmd.Stdout
+
+	if err := cmd.Start(); err != nil {
+		http.Error(rw, fmt.Sprint(err), http.StatusInternalServerError)
+		return
+	}
+
+	rw.Header().Set("Content-Type", "text/event-stream")
+	rw.Header().Set("Cache-Control", "no-cache")
+	rw.Header().Set("Connection", "keep-alive")
+	rw.WriteHeader(200)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+		scan := bufio.NewScanner(stdout)
+		for scan.Scan() {
+			line := scan.Text()
+			io.WriteString(rw, fmt.Sprintf("data: %s\n\n", line))
+			flusher.Flush()
+		}
+	}()
+
+	cmd.Wait()
+	wg.Wait()
+}
+
 func main() {
 	flag.Parse()
 	go gScanner.Run()
@@ -214,6 +278,8 @@ func main() {
 	http.HandleFunc("/connection/add", pageConnectionAdd)
 	http.HandleFunc("/connection/remove", pageConnectionRemove)
 	http.HandleFunc("/blockchain", pageBlockchain)
+	http.HandleFunc("/version", pageVersion)
+	http.HandleFunc("/version/update", pageVersionUpdate)
 
 	log.Printf("Listening on %v", *flagListenAddr)
 	http.ListenAndServe(*flagListenAddr, nil)
