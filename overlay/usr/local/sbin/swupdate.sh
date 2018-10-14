@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+echo "Starting software update..."
+
 GHAPI="https://api.github.com/repos/rasky/cryptofaxpa"
 ASSET_SWFAX="firmware.swfax"
 KEYRING="/home/pi/trusted.gpg"
