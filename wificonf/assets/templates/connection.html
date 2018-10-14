@@ -51,13 +51,12 @@
                   <div class="form-group">
                     <label for="inputName" class="col-md-4 control-label">Wi-Fi Network</label>
                     <div class="col-md-8">
-                      <!--<input type="text" class="form-control" name="name" id="inputName" placeholder="Name">-->
                       <select name="name" class="form-control" id="inputName">
                         {{ $current := .WifiCurrent }}
                         {{ range .WifiScan }}
                             <option {{ if eq $current . }} selected {{ end }}>{{.}}</option>
                         {{ end }}
-                        <option disabled>Reload page to re-scan</option>
+                        <option disabled>Refreshing...</option>
                       </select>
                     </div>
                   </div>
@@ -110,6 +109,36 @@
                 $("#forget").removeClass("disabled");
                 $("#forgetName").val($.trim($(this).clone().children().remove().end().text()));
             });
+
+            window.setInterval(function() {
+                 $.ajax({
+                    type: 'GET',
+                    url: '/connection/scan',
+                    complete: function(r) {
+                        var networks = r.responseText.split(/\n/);
+
+                        var select = $('#inputName');
+                        var selected = select.val();
+                        if(select.prop) {
+                            var options = select.prop('options');
+                        }
+                        else {
+                            var options = select.attr('options');
+                        }
+                        $('option', select).remove();
+
+                        $.each(networks, function(val, text) {
+                            options[options.length] = new Option(text);
+                        });
+
+                        var refr = new Option("Refreshing...");
+                        $(refr).attr('disabled', 'true');
+                        options[options.length] = refr;
+
+                        select.val(selected);
+                    }
+                 });
+            }, 3000);
         });
     </script>
 

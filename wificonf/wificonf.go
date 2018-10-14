@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
+	"strings"
 	"sync"
 	"time"
 
@@ -157,6 +158,12 @@ func pageConnection(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func pageConnectionScan(rw http.ResponseWriter, req *http.Request) {
+	go gScanner.Refresh()
+	rw.Header().Set("Content-Type", "text/plain")
+	io.WriteString(rw, strings.Join(gScanner.Networks(), "\n"))
+}
+
 func pageConnectionAdd(rw http.ResponseWriter, req *http.Request) {
 	if req.Method != "POST" {
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -216,7 +223,7 @@ func pageVersion(rw http.ResponseWriter, req *http.Request) {
 		Active  string
 		Version string
 	}{
-		"connection",
+		"version",
 		string(version),
 	}
 
@@ -275,6 +282,7 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(static)))
 	http.HandleFunc("/", pageHome)
 	http.HandleFunc("/connection", pageConnection)
+	http.HandleFunc("/connection/scan", pageConnectionScan)
 	http.HandleFunc("/connection/add", pageConnectionAdd)
 	http.HandleFunc("/connection/remove", pageConnectionRemove)
 	http.HandleFunc("/blockchain", pageBlockchain)
