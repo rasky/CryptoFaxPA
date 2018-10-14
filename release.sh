@@ -11,6 +11,9 @@ if output=$(git status --porcelain) && [ ! -z "$output" ]; then
 	exit 1
 fi
 
+# Modules must be pristine. Exit if not
+go mod verify >/dev/null
+
 APPS="client wificonf"
 
 # Build the binaries
