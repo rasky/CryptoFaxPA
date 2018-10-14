@@ -73,6 +73,12 @@ tar -C / -xf "/tmp/$ASSET_SWFAX.tgz"
 # Update timestamp
 echo "$UPDATED_AT" >$LAST_TIMESTAMP
 
+# SPECIAL CASE for wpa_supplicant. Update only if not already updated. We use
+# "update_config=1" has key to check, as it's the most important one.
+if ! grep -q ^update_config=1 /etc/wpa_supplicant/wpa_supplicant.conf; then
+	mv /etc/wpa_supplicant/wpa_supplicant.template.conf /etc/wpa_supplicant/wpa_supplicant.conf
+fi
+
 echo "Firmware updated successfully!"
 echo "Rebooting"
 reboot
