@@ -211,16 +211,6 @@ func print_fax(fax common.Fax) {
 var stopAccessPoint *time.Timer
 
 func print_help() {
-	// get our IP address in access point mode
-	// (unfortunately cryptofaxpa.local does not work from Android)
-	out, err := exec.Command("/bin/bash", "-c", `/sbin/ifconfig | /usr/bin/awk -v RS="\n\n" '{ for (i=1; i<=NF; i++) if ($i == "inet") address = $(i+1); if ($1 == "ap0:") printf "%s", address }'`).Output()
-	var hostname string
-	if err == nil && len(out) > 0 {
-		hostname = string(out)
-	} else {
-		hostname = "cryptofaxpa.local"
-	}
-
 	common.StartBlinking()
 	defer common.StopBlinking()
 
@@ -243,19 +233,27 @@ In particolare CryptoFaxPA consente all'utente (d'ora in avanti denominato per s
 	buf.WriteString("\x1b!\x80") // font A, underlined
 	buf.WriteString("Configurazione\n")
 	buf.WriteString("\x1b!\x00") // font A, single-height
-	buf.Write(common.EncodeForPrinter(fmt.Sprintf(`Da questo momento, puoi configurare `+
-		`il dispositivo collegandoti alla speciale rete Wi-Fi chiamata CryptoFaxPA che `+
-		`è stata appena creata, e rimarrà accesa per 15 minuti. Se la pagina di configurazione `+
-		`non si apre automaticamente, vai su http://%s. Lì potrai inserire la password di `+
-		`nuove rete Wi-Fi, o forzare un aggiornamento del software.`, hostname)))
+	buf.Write(common.EncodeForPrinter(fmt.Sprintf(`Da questo momento, puoi configurare ` +
+		`il dispositivo collegandoti alla speciale rete Wi-Fi chiamata CryptoFaxPA che ` +
+		`è stata appena creata, e rimarrà accesa per 15 minuti. Se la pagina di configurazione ` +
+		`non si apre automaticamente, vai su http://192.168.90.1. Lì potrai inserire la password di ` +
+		`nuove rete Wi-Fi, o forzare un aggiornamento del software.`)))
+	buf.WriteString("\n\n")
 
 	// print network addresses
-	out, err = exec.Command("/bin/bash", "-c", `/sbin/ifconfig | /usr/bin/awk -v RS="\n\n" '{ for (i=1; i<=NF; i++) if ($i == "inet") address = $(i+1); if (address != "127.0.0.1") printf "%s\t%s\n", $1, address }'`).Output()
-	if err == nil {
-		buf.WriteString("\n\n")
-		buf.Write(out)
-		buf.WriteString("\n\n")
+	buf.WriteString("\x1b!\x80") // font A, underlined
+	buf.WriteString("Stato della rete\n")
+	buf.WriteString("\x1b!\x00") // font A, single-height
+
+	for _, iif := range []common.Interface{common.IntfGSM, common.IntfWiFi, common.IntfEthernet} {
+		desc := common.InterfaceInspect(iif)
+		line := fmt.Sprintf("%v <%v>: %v [%v]", desc.Name, string(iif), desc.Status, desc.IP)
+		if desc.Comment != "" {
+			line += fmt.Sprintf(" (%v)", desc.Comment)
+		}
+		buf.WriteString(line + "\n")
 	}
+	buf.WriteString("\n\n")
 
 	common.PrintBytes(buf.Bytes(), true)
 

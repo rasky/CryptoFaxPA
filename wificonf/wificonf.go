@@ -132,17 +132,17 @@ func pageConnection(rw http.ResponseWriter, req *http.Request) {
 	data := struct {
 		Active      string
 		Messages    []string
-		Interfaces  []InterfaceDesc
+		Interfaces  []common.InterfaceDesc
 		WifiScan    []string
 		WifiKnown   []string
 		WifiCurrent string
 	}{
 		"connection",
 		gMessages.Get(),
-		[]InterfaceDesc{
-			interfaceByName("wlan0", "Wi-Fi"),
-			interfaceByName("eth0", "Ethernet"),
-			interfaceByName("eth1", "GSM / UMTS"),
+		[]common.InterfaceDesc{
+			common.InterfaceInspect(common.IntfWiFi),
+			common.InterfaceInspect(common.IntfEthernet),
+			common.InterfaceInspect(common.IntfGSM),
 		},
 		gScanner.Networks(),
 		known,
