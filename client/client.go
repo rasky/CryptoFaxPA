@@ -45,7 +45,9 @@ func main() {
 		log.Printf("[INFO] Waiting for printer, retrying in 2 seconds...\n")
 		time.Sleep(2 * time.Second)
 	}
-
+    
+    common.StartBlinkingGreen()
+    
 	// Start background bootstrap sound
 	go exec.Command("play", "startup.ogg").Run()
 
@@ -105,6 +107,7 @@ func PollMqtt(chfax chan bool, surl string) {
 		var err error
 		c, err = common.NewMqttClient(ClientId, surl)
 		if err != nil {
+		    common.StartBlinkingRed()
 			log.Printf("[INFO] cannot connect to MQTT server: %v", err)
 			log.Printf("[INFO] retrying in %v...", sleep)
 			// common.PrintString(fmt.Sprintf("MQTT connection failed, retrying in %v...\n\n", sleep), false)
@@ -114,6 +117,7 @@ func PollMqtt(chfax chan bool, surl string) {
 				sleep = 5 * time.Minute
 			}
 		} else {
+		    common.StopBlinking()
 			break
 		}
 	}
@@ -172,7 +176,7 @@ func print_fax_from_spool() {
 		}
 	}
 
-	common.StartBlinking()
+	common.StartBlinkingGreen()
 	defer common.StopBlinking()
 
 	// Se non è notte fonda, suona la musichetta del modem mentre
@@ -216,7 +220,7 @@ func print_fax(fax common.Fax) {
 var stopAccessPoint *time.Timer
 
 func print_help() {
-	common.StartBlinking()
+	common.StartBlinkingGreen()
 	defer common.StopBlinking()
 
 	var buf bytes.Buffer
@@ -273,7 +277,7 @@ In particolare CryptoFaxPA consente all'utente (d'ora in avanti denominato per s
 }
 
 func print_blockchain() {
-	common.StartBlinking()
+	common.StartBlinkingGreen()
 	defer common.StopBlinking()
 
 	var buf bytes.Buffer

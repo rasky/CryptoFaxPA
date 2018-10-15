@@ -149,10 +149,15 @@ func PrintImage(pngimg []byte, feed_past_cutter bool) {
 	PrintBytes(buf.Bytes(), feed_past_cutter)
 }
 
-func StartBlinking() {
+func StartBlinkingGreen() {
     PrintString("\x1bX\x2d\x01", false)
 }
 
+func StartBlinkingRed() {
+    PrintString("\x1bX\x2d\x02", false)
+}
+
+// turns to green
 func StopBlinking() {
     PrintString("\x1bX\x2d\x00", false)
 }
