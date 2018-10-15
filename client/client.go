@@ -42,7 +42,7 @@ func main() {
 
 	// Check that printer is connected
 	for !common.PrinterIsConnected() {
-		log.Printf("Waiting for printer, retrying in 2 seconds...\n")
+		log.Printf("[INFO] Waiting for printer, retrying in 2 seconds...\n")
 		time.Sleep(2 * time.Second)
 	}
 
@@ -56,6 +56,7 @@ func main() {
 
 	// See if there are pending faxes in the spool; if so, schedule them right away
 	if files, err := ioutil.ReadDir(*flagSpoolDir); err == nil && len(files) > 0 {
+	    log.Printf("[INFO] found %d files in spool at boot", len(files))
 		go func() {
 			for _ = range files {
 				chfax <- true
@@ -84,13 +85,14 @@ func main() {
 			}
 			switch evt.Pin {
 			case PinHelp:
-				fmt.Println("help button pressed")
+				log.Printf("[INFO] help button pressed")
 				print_help()
 			case PinBlockchain:
-				fmt.Println("blockchain button pressed")
+				log.Printf("[INFO] blockchain button pressed")
 				print_blockchain()
 			}
 		case <-chfax:
+			log.Printf("[DEBUG] printing fax")
 			print_fax_from_spool()
 		}
 	}
@@ -120,6 +122,7 @@ func PollMqtt(chfax chan bool, surl string) {
 	c.Subscribe(common.FaxMqttTopic, ClientMqttQos, func(client mqtt.Client, msg mqtt.Message) {
 		// Use a filename whose alphabetical sorting respects the order of arrival
 		filename := fmt.Sprintf("%s/%016x", *flagSpoolDir, time.Now().UnixNano())
+	    log.Printf("[DEBUG] got MQTT message, written to %s", filename)
 		common.WriteFileSync(filename, msg.Payload(), 0777)
 		chfax <- true
 	})
@@ -180,6 +183,8 @@ func print_fax_from_spool() {
 
 		// Fai suonare un po' la musichetta prima di iniziare a stampare
 		time.Sleep(6 * time.Second)
+	} else {
+	    log.Printf("[DEBUG] too late, not playing modem sound")
 	}
 
 	print_fax(fax)
