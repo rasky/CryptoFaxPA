@@ -121,9 +121,10 @@ type BlockchainNerdInfo struct {
 	Value string
 }
 
-func httpGetString(url string) string {
+func httpGetString(url string, outerr *error) string {
 	res, err := http.Get(url)
 	if err != nil {
+	    *outerr = err
 		return ""
 	}
 	var buf bytes.Buffer
@@ -156,17 +157,17 @@ func human(s string) string {
 	return s
 }
 
-func GetBlockchainNerdInfos() []BlockchainNerdInfo {
+func GetBlockchainNerdInfos() (infos []BlockchainNerdInfo, err error) {
 	return []BlockchainNerdInfo{
-		{Name: "Current BTC price (USD)", Value: "$" + httpGetString("https://blockchain.info/q/24hrprice")},
-		{Name: "Market cap (USD)", Value: "$" + human(httpGetString("https://blockchain.info/q/marketcap"))},
-		{Name: "Global hash rate (GigaHash)", Value: human(httpGetString("https://blockchain.info/q/hashrate"))},
-		{Name: "Current difficulty target", Value: human(httpGetString("https://blockchain.info/q/getdifficulty"))},
-		{Name: "Current block height", Value: httpGetString("https://blockchain.info/q/getblockcount")},
-		{Name: "Latest hash", Value: httpGetString("https://blockchain.info/q/latesthash")},
-		{Name: "Current block reward", Value: satoshis(httpGetString("https://blockchain.info/q/bcperblock"))},
-		{Name: "Total bitcoins", Value: satoshis(httpGetString("https://blockchain.info/q/totalbc"))},
-		{Name: "Probability of mining", Value: httpGetString("https://blockchain.info/q/probability")},
-		{Name: "ETA until next block", Value: seconds(httpGetString("https://blockchain.info/q/eta"))},
-	}
+		{Name: "Current BTC price (USD)", Value: "$" + httpGetString("https://blockchain.info/q/24hrprice", &err)},
+		{Name: "Market cap (USD)", Value: "$" + human(httpGetString("https://blockchain.info/q/marketcap", &err))},
+		{Name: "Global hash rate (GigaHash)", Value: human(httpGetString("https://blockchain.info/q/hashrate", &err))},
+		{Name: "Current difficulty target", Value: human(httpGetString("https://blockchain.info/q/getdifficulty", &err))},
+		{Name: "Current block height", Value: httpGetString("https://blockchain.info/q/getblockcount", &err)},
+		{Name: "Latest hash", Value: httpGetString("https://blockchain.info/q/latesthash", &err)},
+		{Name: "Current block reward", Value: satoshis(httpGetString("https://blockchain.info/q/bcperblock", &err))},
+		{Name: "Total bitcoins", Value: satoshis(httpGetString("https://blockchain.info/q/totalbc", &err))},
+		{Name: "Probability of mining", Value: httpGetString("https://blockchain.info/q/probability", &err)},
+		{Name: "ETA until next block", Value: seconds(httpGetString("https://blockchain.info/q/eta", &err))},
+	}, err
 }

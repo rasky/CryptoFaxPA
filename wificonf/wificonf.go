@@ -107,13 +107,15 @@ func pageHome(rw http.ResponseWriter, req *http.Request) {
 }
 
 func pageBlockchain(rw http.ResponseWriter, req *http.Request) {
+    infos, _ := common.GetBlockchainNerdInfos()
+    
 	data := struct {
 		Active    string
 		NerdInfos []common.BlockchainNerdInfo
 		Graph     string
 	}{
 		"blockchain",
-		common.GetBlockchainNerdInfos(),
+		infos,
 		common.GetBitcoinAsciiGraph(100, 30),
 	}
 

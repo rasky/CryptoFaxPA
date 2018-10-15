@@ -286,8 +286,15 @@ func print_blockchain() {
 	buf.WriteString("BLOCKCHAIN SUPER NERD INFO\n")
 	buf.WriteString("\x1b!\x00") // font A, single-height
 	fmt.Fprintln(&buf, "Updated at:", common.NowHere().Format("2006-01-02 15:04:05 (MST)"))
-
-	for _, info := range common.GetBlockchainNerdInfos() {
+    
+    infos, err := common.GetBlockchainNerdInfos()
+    if err != nil {
+        buf.WriteString("\nUh-oh, no Internet connection.\nBlockchain is broken!\n")
+        common.PrintBytes(buf.Bytes(), true)
+        return
+    }
+    
+	for _, info := range infos {
 		fmt.Fprintf(&buf, "%s:\n %s\n", info.Name, info.Value)
 	}
 	common.PrintBytes(buf.Bytes(), true)
