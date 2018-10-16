@@ -79,6 +79,10 @@ if ! grep -q ^update_config=1 /etc/wpa_supplicant/wpa_supplicant.conf; then
 	mv /etc/wpa_supplicant/wpa_supplicant.template.conf /etc/wpa_supplicant/wpa_supplicant.conf
 fi
 
+# Restore overwritten permissions
+chown pi /home/pi
+chmod 777 /home/pi
+
 echo "Firmware updated successfully!"
 echo "Rebooting"
 reboot
