@@ -9,7 +9,7 @@ KEYRING="/home/pi/trusted.gpg"
 LAST_TIMESTAMP="/var/cache/firmware.last_updated"
 
 # Do a http_get request to the specified URL.
-# When the HTTP result code is 2xx, outputs the body of the result on stdout.
+# When the HTTP result code is 2xx, outputs the response body on stdout.
 # When the HTTP result code is not 2xx (or the request fails at the HTTP-level
 # for other errors), an error message that includes the response body is
 # output to stderr, and the script is aborted.
@@ -66,7 +66,7 @@ fi
 # Verify the archive before extracting, just in case
 tar -tf "/tmp/$ASSET_SWFAX.tgz"
 
-# Extract the new software. Use unlink-first to ovewrite running binaries
+# Extract the new software.
 echo "Extracting firmware..."
 tar -C / -xf "/tmp/$ASSET_SWFAX.tgz"
 
