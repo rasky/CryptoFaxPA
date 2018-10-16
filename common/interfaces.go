@@ -1,8 +1,10 @@
 package common
 
 import (
+	"log"
 	"net"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -69,8 +71,15 @@ func InterfaceInspect(iif Interface) InterfaceDesc {
 	}
 
 	d := net.Dialer{
-		Timeout:   time.Duration(2 * time.Second),
+		Timeout:   time.Duration(5 * time.Second),
 		LocalAddr: laddr,
+		Control: func(network, address string, c syscall.RawConn) error {
+			return c.Control(func(fd uintptr) {
+				if err := syscall.BindToDevice(int(fd), string(iif)); err != nil {
+					log.Printf("[ERROR] cannot bind to specific interface %v during network testing: %v", string(iif), err)
+				}
+			})
+		},
 	}
 	if conn, err := d.Dial("tcp", "www.google.com:80"); err != nil {
 		desc.Status = "NOINTERNET"
