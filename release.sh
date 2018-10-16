@@ -2,6 +2,8 @@
 # Script to create a software update that will be deployed to CryptoFaxPA
 set -euo pipefail
 
+echo "Checking working copy..."
+
 # The checkout must be pristine
 if output=$(git status --porcelain) && [ ! -z "$output" ]; then
 	echo "release.sh must be run only a pristine checkout."
