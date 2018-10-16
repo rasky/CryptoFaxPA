@@ -16,13 +16,11 @@ fi
 # Modules must be pristine. Exit if not
 go mod verify >/dev/null
 
-APPS="client wificonf"
-
 # Build the binaries
-for app in $APPS; do
-	GOOS=linux GOARCH=arm GOARM=7 \
-		go build -ldflags="-s -w" -o "$(pwd)/overlay/home/pi/$app" "./$app"
-done
+GOOS=linux GOARCH=arm GOARM=7 \
+	go build -ldflags="-s -w" -o "$(pwd)/overlay/home/pi/client" "./client"
+GOOS=linux GOARCH=arm GOARM=7 \
+	packr build -ldflags="-s -w" -o "$(pwd)/overlay/home/pi/wificonf" "./wificonf"
 
 VHASH=$(git log --pretty=format:'%h' -n1)
 VDATE=$(git log --pretty=format:'%ci' -n1)
