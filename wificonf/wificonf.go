@@ -39,9 +39,10 @@ type BackgroundScanner struct {
 	w     sync.Mutex
 	m     sync.Mutex
 	ssids []string
+	intf  []common.InterfaceDesc
 }
 
-func (scan *BackgroundScanner) Refresh() {
+func (scan *BackgroundScanner) RefreshWifi() {
 	scan.w.Lock()
 	defer scan.w.Unlock()
 
@@ -53,9 +54,21 @@ func (scan *BackgroundScanner) Refresh() {
 	}
 }
 
+func (scan *BackgroundScanner) RefreshInterfaces() {
+	intf := []common.InterfaceDesc{
+		common.InterfaceInspect(common.IntfWiFi),
+		common.InterfaceInspect(common.IntfEthernet),
+		common.InterfaceInspect(common.IntfGSM),
+	}
+	scan.m.Lock()
+	scan.intf = intf
+	scan.m.Unlock()
+}
+
 func (scan *BackgroundScanner) Run() {
 	for {
-		scan.Refresh()
+		scan.RefreshInterfaces()
+		scan.RefreshWifi()
 		time.Sleep(5 * time.Minute)
 	}
 }
@@ -64,6 +77,12 @@ func (scan *BackgroundScanner) Networks() []string {
 	scan.m.Lock()
 	defer scan.m.Unlock()
 	return scan.ssids
+}
+
+func (scan *BackgroundScanner) Interfaces() []common.InterfaceDesc {
+	scan.m.Lock()
+	defer scan.m.Unlock()
+	return scan.intf
 }
 
 var gScanner BackgroundScanner
@@ -107,8 +126,8 @@ func pageHome(rw http.ResponseWriter, req *http.Request) {
 }
 
 func pageBlockchain(rw http.ResponseWriter, req *http.Request) {
-    infos, _ := common.GetBlockchainNerdInfos()
-    
+	infos, _ := common.GetBlockchainNerdInfos()
+
 	data := struct {
 		Active    string
 		NerdInfos []common.BlockchainNerdInfo
@@ -126,7 +145,8 @@ func pageBlockchain(rw http.ResponseWriter, req *http.Request) {
 
 func pageConnection(rw http.ResponseWriter, req *http.Request) {
 	// Trigger a wifi refresh every time the page is opened
-	go gScanner.Refresh()
+	go gScanner.RefreshWifi()
+	go gScanner.RefreshInterfaces()
 
 	curwifi, _ := WpaCurrentNetwork()
 	known, _ := WpaKnownNetworks()
@@ -141,17 +161,13 @@ func pageConnection(rw http.ResponseWriter, req *http.Request) {
 	}{
 		"connection",
 		gMessages.Get(),
-		[]common.InterfaceDesc{
-			common.InterfaceInspect(common.IntfWiFi),
-			common.InterfaceInspect(common.IntfEthernet),
-			common.InterfaceInspect(common.IntfGSM),
-		},
+		gScanner.Interfaces(),
 		gScanner.Networks(),
 		known,
 		curwifi,
 	}
 
-	if curwifi != "" {
+	if curwifi != "" && len(data.Interfaces) != 0 {
 		data.Interfaces[0].Comment = "(" + curwifi + ")"
 	}
 
@@ -161,7 +177,7 @@ func pageConnection(rw http.ResponseWriter, req *http.Request) {
 }
 
 func pageConnectionScan(rw http.ResponseWriter, req *http.Request) {
-	go gScanner.Refresh()
+	go gScanner.RefreshWifi()
 	rw.Header().Set("Content-Type", "text/plain")
 	io.WriteString(rw, strings.Join(gScanner.Networks(), "\n"))
 }
