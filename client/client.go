@@ -45,9 +45,9 @@ func main() {
 		log.Printf("[INFO] Waiting for printer, retrying in 2 seconds...\n")
 		time.Sleep(2 * time.Second)
 	}
-    
-    common.StartBlinkingGreen()
-    
+
+	common.StartBlinkingGreen()
+
 	// Start background bootstrap sound
 	go exec.Command("play", "startup.ogg").Run()
 
@@ -58,7 +58,7 @@ func main() {
 
 	// See if there are pending faxes in the spool; if so, schedule them right away
 	if files, err := ioutil.ReadDir(*flagSpoolDir); err == nil && len(files) > 0 {
-	    log.Printf("[INFO] found %d files in spool at boot", len(files))
+		log.Printf("[INFO] found %d files in spool at boot", len(files))
 		go func() {
 			for _ = range files {
 				chfax <- true
@@ -107,7 +107,7 @@ func PollMqtt(chfax chan bool, surl string) {
 		var err error
 		c, err = common.NewMqttClient(ClientId, surl)
 		if err != nil {
-		    common.StartBlinkingRed()
+			common.StartBlinkingRed()
 			log.Printf("[INFO] cannot connect to MQTT server: %v", err)
 			log.Printf("[INFO] retrying in %v...", sleep)
 			// common.PrintString(fmt.Sprintf("MQTT connection failed, retrying in %v...\n\n", sleep), false)
@@ -117,7 +117,7 @@ func PollMqtt(chfax chan bool, surl string) {
 				sleep = 5 * time.Minute
 			}
 		} else {
-		    common.StopBlinking()
+			common.StopBlinking()
 			break
 		}
 	}
@@ -126,7 +126,7 @@ func PollMqtt(chfax chan bool, surl string) {
 	c.Subscribe(common.FaxMqttTopic, ClientMqttQos, func(client mqtt.Client, msg mqtt.Message) {
 		// Use a filename whose alphabetical sorting respects the order of arrival
 		filename := fmt.Sprintf("%s/%016x", *flagSpoolDir, time.Now().UnixNano())
-	    log.Printf("[DEBUG] got MQTT message, written to %s", filename)
+		log.Printf("[DEBUG] got MQTT message, written to %s", filename)
 		common.WriteFileSync(filename, msg.Payload(), 0777)
 		chfax <- true
 	})
@@ -188,7 +188,7 @@ func print_fax_from_spool() {
 		// Fai suonare un po' la musichetta prima di iniziare a stampare
 		time.Sleep(6 * time.Second)
 	} else {
-	    log.Printf("[DEBUG] too late, not playing modem sound")
+		log.Printf("[DEBUG] too late, not playing modem sound")
 	}
 
 	print_fax(fax)
@@ -286,14 +286,14 @@ func print_blockchain() {
 	buf.WriteString("BLOCKCHAIN SUPER NERD INFO\n")
 	buf.WriteString("\x1b!\x00") // font A, single-height
 	fmt.Fprintln(&buf, "Updated at:", common.NowHere().Format("2006-01-02 15:04:05 (MST)"))
-    
-    infos, err := common.GetBlockchainNerdInfos()
-    if err != nil {
-        buf.WriteString("\nUh-oh, no Internet connection.\nBlockchain is broken!\n")
-        common.PrintBytes(buf.Bytes(), true)
-        return
-    }
-    
+
+	infos, err := common.GetBlockchainNerdInfos()
+	if err != nil {
+		buf.WriteString("\nUh-oh, no Internet connection.\nBlockchain is broken!\n")
+		common.PrintBytes(buf.Bytes(), true)
+		return
+	}
+
 	for _, info := range infos {
 		fmt.Fprintf(&buf, "%s:\n %s\n", info.Name, info.Value)
 	}
