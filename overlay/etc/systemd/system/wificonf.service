@@ -5,3 +5,4 @@ Description = Wi-Fi Configuration daemon
 Type = simple
 Restart = always
 ExecStart = /home/pi/wificonf -listen 192.168.90.1:80
+WorkingDirectory = /home/pi
